@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+
+{% block title %}Dossiê: {{ person.name }}{% endblock %}
+
+{% block head_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/detail.css') }}">
+{% endblock %}
+
+{% block content %}
+    <div class="detail-header">
+        <h1>Dossiê do Indivíduo</h1>
+        <a href="{{ url_for('gallery') }}" class="back-link">&laquo; Voltar para a Galeria</a>
+    </div>
+
+    <div class="dossier-grid">
+        <div class="dossier-photo-panel">
+            <img src="{{ url_for('static', filename='db_images/' + person.image_filename) }}" alt="Foto de {{ person.name }}">
+            <h3>{{ person.name }}</h3>
+            <p>Status: <span class="status-{{ person.status | lower | replace(' ', '-') }}">{{ person.status }}</span></p>
+        </div>
+
+        <div class="dossier-info-panel">
+            <h2>Informações Pessoais</h2>
+            <ul>
+                <li><strong>ID do Sistema:</strong> <span>SV-{{ person.id }}</span></li>
+                {% if person.age %}<li><strong>Idade:</strong> <span>{{ person.age }} anos</span></li>{% endif %}
+                {% if person.doc_number %}<li><strong>Nº Documento:</strong> <span>{{ person.doc_number }}</span></li>{% endif %}
+                {% if person.city and person.state %}<li><strong>Localização:</strong> <span>{{ person.city }}, {{ person.state }}</span></li>{% endif %}
+                <li><strong>Data de Cadastro:</strong> <span>{{ person.registration_date.strftime('%d/%m/%Y às %H:%M') }}</span></li>
+            </ul>
+
+            <h2>Observações</h2>
+            <div class="notes-box">
+                <p>{{ person.notes if person.notes else "Nenhuma observação registrada." }}</p>
+            </div>
+            
+            <div class="delete-button-wrapper">
+                <form action="{{ url_for('delete', person_id=person.id) }}" method="POST" onsubmit="return confirm('ATENÇÃO: Deseja deletar permanentemente o perfil de {{ person.name }}?');">
+                    <button type="submit" class="delete-button">Deletar Perfil</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

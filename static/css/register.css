@@ -1,0 +1,82 @@
+/* static/css/register.css (VERSÃO COM RESPONSIVIDADE CORRIGIDA) */
+
+.register-form-panel {
+    max-width: 900px;
+    background: var(--card-bg);
+    padding: 40px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+.form-column {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-size: 1em;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+    font-weight: 500;
+}
+
+input[type="text"],
+input[type="number"],
+select,
+textarea {
+    background-color: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 14px;
+    border-radius: 6px;
+    width: 100%;
+    font-size: 1em;
+    font-family: var(--font-body);
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: 1px solid var(--accent-blue);
+}
+
+textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+form button {
+    margin-top: 30px;
+    background-color: var(--accent-blue);
+    color: var(--bg-dark);
+    font-size: 1.1em;
+    font-weight: 600;
+    border: none;
+    padding: 14px 30px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    width: 100%;
+    grid-column: 1 / -1;
+}
+
+form button:hover {
+    background-color: #82c8ff;
+}
+
+/* NOVA REGRA: Em telas com largura de até 1024px, o formulário vira uma coluna só */
+@media (max-width: 1024px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}

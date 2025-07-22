@@ -1,0 +1,56 @@
+/* static/css/login.css */
+.login-page-body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--bg-content);
+    height: 100vh;
+}
+.login-container {
+    width: 100%;
+    max-width: 400px;
+    padding: 40px;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    text-align: center;
+}
+.login-header {
+    font-family: var(--font-heading);
+    font-size: 2em;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+.login-header span { color: var(--accent-blue); }
+.login-subtitle { color: var(--text-secondary); margin-bottom: 30px; }
+.login-form { text-align: left; }
+.form-group { margin-bottom: 20px; }
+.form-group label {
+    display: block;
+    color: var(--text-secondary);
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    border-radius: 6px;
+    font-size: 1em;
+}
+.login-form button {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--accent-blue);
+    color: var(--bg-dark);
+    border: none;
+    border-radius: 6px;
+    font-size: 1.1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    margin-top: 10px;
+}
+.login-form button:hover { background-color: #82c8ff; }

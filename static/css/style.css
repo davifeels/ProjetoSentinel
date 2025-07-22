@@ -1,0 +1,174 @@
+/* style.css */
+
+/* --- Variáveis de Cor e Estilo --- */
+:root {
+    --primary-color: #00d4ff; /* Azul Neon */
+    --dark-bg-color: #0a0a14;
+    --text-color-primary: #ffffff;
+    --text-color-secondary: #c0c0c0;
+    --glass-bg: rgba(22, 28, 51, 0.5); /* Fundo dos painéis de vidro */
+    --glass-border: rgba(255, 255, 255, 0.15);
+    --font-heading: 'Orbitron', sans-serif;
+    --font-body: 'Roboto', sans-serif;
+}
+
+/* --- Reset e Configuração Global --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-body);
+    background-color: var(--dark-bg-color);
+    color: var(--text-color-primary);
+    
+    /* Imagem de fundo com overlay escuro para contraste */
+    background-image: 
+        linear-gradient(rgba(10, 10, 20, 0.8), rgba(10, 10, 20, 0.8)),
+        url('https://images.unsplash.com/photo-1622482181819-30e941fbb92d?auto=format&fit=crop&w=1920&q=80');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed; /* Mantém o fundo fixo ao rolar a página */
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 2rem;
+}
+
+/* --- Container Principal do Dashboard --- */
+.dashboard-container {
+    width: 100%;
+    max-width: 900px;
+    
+    /* Estilo "Glassmorphism" */
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px); /* Suporte para Safari */
+    border: 1px solid var(--glass-border);
+    
+    border-radius: 20px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    padding: 2.5rem 3rem;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- Cabeçalho e Logotipo --- */
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+.logo {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    letter-spacing: 2px;
+}
+.logo-main {
+    font-weight: 700;
+    color: var(--text-color-primary);
+}
+.logo-accent {
+    font-weight: 700;
+    color: var(--primary-color);
+    text-shadow: 0 0 10px var(--primary-color); /* Efeito de brilho */
+}
+
+/* --- Conteúdo Principal --- */
+.welcome-message {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+.welcome-message h1 {
+    font-family: var(--font-heading);
+    margin-bottom: 0.5rem;
+}
+.welcome-message p {
+    font-weight: 300;
+    color: var(--text-color-secondary);
+    font-size: 1.1rem;
+}
+
+/* --- Feed da Câmera --- */
+.camera-feed-placeholder {
+    width: 100%;
+    aspect-ratio: 16 / 9; /* Proporção de tela widescreen */
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px dashed var(--glass-border);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: var(--text-color-secondary);
+    font-family: var(--font-heading);
+    letter-spacing: 1.5px;
+    transition: all 0.3s ease;
+    animation: pulse-border 3s infinite; /* Animação sutil de pulso */
+}
+.camera-icon svg {
+    margin-bottom: 1rem;
+    stroke: var(--text-color-secondary);
+}
+
+/* --- Botão de Ação --- */
+.action-panel {
+    margin-top: 2rem;
+    text-align: center;
+}
+.btn {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-color-primary);
+    background: linear-gradient(45deg, var(--primary-color), #4d5bce);
+    border: none;
+    padding: 1rem 2.5rem;
+    border-radius: 50px; /* Botão em formato de pílula */
+    cursor: pointer;
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+    transition: all 0.3s ease;
+}
+.btn:hover {
+    transform: translateY(-3px); /* Efeito de elevação */
+    box-shadow: 0 0 30px rgba(0, 212, 255, 0.7);
+}
+
+/* --- Rodapé --- */
+.dashboard-footer {
+    text-align: center;
+    margin-top: 2.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--glass-border);
+    font-size: 0.9rem;
+    color: var(--text-color-secondary);
+    font-weight: 300;
+}
+
+/* --- Animações --- */
+@keyframes pulse-border {
+    0% { border-color: var(--glass-border); }
+    50% { border-color: var(--primary-color); }
+    100% { border-color: var(--glass-border); }
+}
+
+/* --- Layout Responsivo --- */
+@media (max-width: 768px) {
+    body {
+        padding: 1rem;
+    }
+    .dashboard-container {
+        padding: 2rem;
+    }
+    .logo {
+        font-size: 1.8rem;
+    }
+    .welcome-message h1 {
+        font-size: 1.5rem;
+    }
+}

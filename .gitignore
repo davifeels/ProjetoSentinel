@@ -1,0 +1,25 @@
+# Arquivo de segredos
+.env
+
+# Banco de dados SQLite (se ainda existir)
+database.db
+
+# Arquivos de ambiente virtual Python
+venv/
+.venv/
+env/
+.env/
+*.pyc
+
+# Pastas de cache do Python
+__pycache__/
+
+# Arquivos temporários gerados pela aplicação
+uploads/
+
+# Configurações do editor VS Code
+.vscode/
+
+# Arquivos de sistema (Windows/macOS)
+.DS_Store
+Thumbs.db

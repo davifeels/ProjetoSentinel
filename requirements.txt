@@ -1,0 +1,22 @@
+# requirements.txt (Versão Correta e Otimizada para o SentinelVision)
+
+blinker
+click
+colorama
+dlib
+face-recognition
+face_recognition_models
+faiss-cpu
+Flask
+Flask-Login
+Flask-SQLAlchemy
+gunicorn
+itsdangerous
+Jinja2
+MarkupSafe
+numpy
+Pillow
+psycopg2-binary
+python-dotenv
+SQLAlchemy
+Werkzeug
