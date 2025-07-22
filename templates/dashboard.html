@@ -30,7 +30,15 @@
                 {% for person in recent_profiles %}
                 <li>
                     <a href="{{ url_for('person_detail', person_id=person.id) }}">
-                        <img src="{{ url_for('static', filename='db_images/' + person.image_filename) }}" alt="Foto de {{ person.name }}">
+                        
+                        {% set profile_photo = person.photos|selectattr('photo_type', 'equalto', 'profile')|first %}
+                        
+                        {% if profile_photo %}
+                            <img src="{{ url_for('static', filename='db_images/' + profile_photo.filename) }}" alt="Foto de {{ person.name }}">
+                        {% else %}
+                            <div class="placeholder-image" style="width: 45px; height: 45px; background: #30363d; border-radius: 50%;"></div>
+                        {% endif %}
+
                         <div class="activity-info">
                             <span class="activity-name">{{ person.name }}</span>
                             <span class="activity-time">{{ person.registration_date.strftime('%d/%m/%Y') }}</span>
@@ -49,30 +57,18 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-    // Configuração do Gráfico de Pizza
     const ctx = document.getElementById('statusChart');
-    const statusData = {{ status_chart_data.data|tojson }};
-    const statusLabels = {{ status_chart_data.labels|tojson }};
+    const statusData = {{ status_chart_data.data|tojson|safe }};
+    const statusLabels = {{ status_chart_data.labels|tojson|safe }};
 
     new Chart(ctx, {
-        type: 'doughnut', // Tipo do gráfico (pizza com furo no meio)
+        type: 'doughnut',
         data: {
             labels: statusLabels,
             datasets: [{
                 label: 'Perfis',
                 data: statusData,
-                backgroundColor: [ // Cores para cada fatia
-                    'rgba(240, 173, 78, 0.7)',  // Amarelo para "Em Observação"
-                    'rgba(92, 184, 92, 0.7)',   // Verde para "Ativo"
-                    'rgba(248, 81, 73, 0.7)',    // Vermelho para "Procurado"
-                    'rgba(139, 148, 158, 0.7)'  // Cinza para "Inativo"
-                ],
-                borderColor: [
-                    '#f0ad4e',
-                    '#5cb85c',
-                    '#f85149',
-                    '#8b949e'
-                ],
+                backgroundColor: {{ status_chart_data.colors|tojson|safe }},
                 borderWidth: 1
             }]
         },
@@ -81,9 +77,9 @@
             maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    position: 'bottom', // Posição da legenda
+                    position: 'bottom',
                     labels: {
-                        color: '#c9d1d9', // Cor do texto da legenda
+                        color: '#c9d1d9',
                         font: {
                             family: "'Source Sans 3', sans-serif",
                             size: 14

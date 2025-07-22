@@ -26,7 +26,7 @@
     <div id="text-search-panel" class="search-panel" style="display: none;">
         <form method="GET" action="{{ url_for('gallery') }}">
             <div class="form-group">
-                <label for="text-query">Buscar por Nome, Documento, Cidade ou Status</label>
+                <label for="text-query">Buscar por Nome, Documento, Endereço ou Status</label>
                 <input id="text-query" type="text" name="query" placeholder="Digite o termo da busca...">
             </div>
             <button type="submit">Buscar Dados</button>
@@ -67,6 +67,8 @@ document.getElementById('search-form').addEventListener('submit', function(event
         if (data.error) {
             html = `<div class="alert alert-error">${data.error}</div>`;
         } else if (data.status === 'success') {
+            // --- CORREÇÃO APLICADA AQUI ---
+            // O 'src' da imagem agora usa a 'image_url' que vem do JSON
             html = `
                 <div class="result-card">
                     <h2>Correspondência Positiva</h2>

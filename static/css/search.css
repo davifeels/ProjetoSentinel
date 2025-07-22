@@ -91,7 +91,7 @@ input:focus {
 }
 
 
-/* --- Seção de Resultado (sem alterações) --- */
+/* --- Seção de Resultado (CORRIGIDA) --- */
 .result-container {
     min-height: 350px;
     display: flex;
@@ -104,8 +104,10 @@ input:focus {
     background-color: transparent;
     border: none;
     padding: 0;
-    max-width: 220px;
+    width: 100%; /* Garante que o card ocupe o espaço */
+    max-width: 220px; /* Define o tamanho máximo do card */
     text-align: center;
+    margin: 0 auto; /* Centraliza o card de resultado */
 }
 
 .result-card h2 {
@@ -118,11 +120,12 @@ input:focus {
 .result-card a {
     text-decoration: none;
 }
+
 .result-card img {
-    width: 220px;
-    height: 220px;
-    object-fit: cover;
-    border-radius: 50%;
+    width: 100%; /* Faz a imagem ocupar 100% da largura do card */
+    height: 220px; /* Mantém a altura fixa para formar o quadrado */
+    object-fit: cover; /* Garante que a imagem preencha o espaço sem distorcer */
+    border-radius: 8px; /* Cantos quadrados arredondados */
     border: 4px solid var(--accent-blue);
     margin-bottom: 20px;
     box-shadow: 0 0 30px rgba(88, 166, 255, 0.3);

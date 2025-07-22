@@ -8,6 +8,9 @@ services:
       - "5000:5000"
     volumes:
       - .:/app
+    # A linha abaixo foi adicionada para carregar o arquivo .env
+    env_file:
+      - .env
     environment:
       - FLASK_APP=app.py
       - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@db/sentinelvision_db
@@ -22,6 +25,7 @@ services:
     environment:
       - POSTGRES_DB=sentinelvision_db
       - POSTGRES_USER=postgres
+      # A senha agora será lida do arquivo .env pelo Docker Compose
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"

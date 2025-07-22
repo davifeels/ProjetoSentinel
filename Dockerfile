@@ -1,29 +1,32 @@
-# Dockerfile
 FROM python:3.11-slim
 
-WORKDIR /app
+# Variável de ambiente para evitar prompts interativos
+ENV DEBIAN_FRONTEND=noninteractive
 
-# Instala as dependências do sistema necessárias para compilar dlib, face-recognition etc
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# Instala dependências de sistema
+RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
     libboost-all-dev \
-    libglib2.0-0 \
-    libsm6 \
-    libxext6 \
-    libxrender-dev \
+    libopenblas-dev \
+    liblapack-dev \
+    libx11-dev \
+    libgtk-3-dev \
+    python3-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Copia requirements e instala tudo de uma vez só
-COPY requirements.txt .
+# Define diretório de trabalho
+WORKDIR /app
 
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copia o restante do código da aplicação
+# Copia os arquivos para dentro do container
 COPY . .
 
-# Expõe a porta que o Gunicorn usará
+# Instala as dependências do Python
+RUN pip install --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt
+
+# Expõe a porta
 EXPOSE 5000
 
-# Comando para iniciar o servidor Gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "4", "app:app"]
+# Comando padrão
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
