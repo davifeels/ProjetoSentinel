@@ -1,82 +1,178 @@
-/* static/css/register.css (VERSÃO COM RESPONSIVIDADE CORRIGIDA) */
+/* static/css/register.css (Versão com botão centralizado e menor) */
 
 .register-form-panel {
-    max-width: 900px;
-    background: var(--card-bg);
-    padding: 40px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
+    max-width: 1050px;
 }
 
 .form-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 30px;
-}
-
-.form-column {
-    display: flex;
-    flex-direction: column;
-    gap: 25px;
+    gap: 0px 50px;
 }
 
 .form-group {
-    display: flex;
-    flex-direction: column;
+    margin-bottom: 22px;
 }
 
 .form-group label {
-    font-size: 1em;
-    color: var(--text-secondary);
+    display: block;
     margin-bottom: 10px;
-    font-weight: 500;
+    font-weight: 600;
+    color: var(--text-secondary);
 }
 
-input[type="text"],
-input[type="number"],
-select,
-textarea {
+.register-form-panel input[type="text"],
+.register-form-panel input[type="date"],
+.register-form-panel input[type="email"],
+.register-form-panel select,
+.register-form-panel textarea {
+    width: 100%;
+    padding: 13px;
     background-color: var(--bg-dark);
     border: 1px solid var(--border-color);
     color: var(--text-primary);
-    padding: 14px;
     border-radius: 6px;
-    width: 100%;
     font-size: 1em;
     font-family: var(--font-body);
+    transition: all 0.2s ease-in-out;
 }
 
-input:focus, select:focus, textarea:focus {
-    outline: 1px solid var(--accent-blue);
+.register-form-panel input:focus,
+.register-form-panel select:focus,
+.register-form-panel textarea:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 3px rgba(88, 166, 253, 0.2);
 }
 
-textarea {
+.register-form-panel textarea {
     resize: vertical;
-    min-height: 80px;
+    min-height: 140px;
 }
 
-form button {
-    margin-top: 30px;
+.custom-file-input {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background-color: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 5px 5px 5px 15px;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+.custom-file-input:has(input:focus) {
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 3px rgba(88, 166, 253, 0.2);
+}
+
+.input-file {
+    display: none;
+}
+
+.btn-file {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 15px;
+    background-color: var(--border-color);
+    color: var(--text-secondary);
+    border-radius: 5px;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.custom-file-input:hover .btn-file {
+    background-color: var(--accent-blue);
+    color: #ffffff;
+}
+
+.file-chosen-text {
+    color: var(--text-secondary);
+    font-size: 0.9em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* --- MUDANÇA PRINCIPAL AQUI --- */
+/* Estilo do Botão "Registrar" corrigido */
+form > button[type="submit"] {
+    display: block; /* Necessário para aplicar margem automática */
+    width: auto; /* Remove a largura de 100%, ajustando ao conteúdo */
+    min-width: 300px; /* Define uma largura mínima para não ficar muito pequeno */
+    margin-left: auto; /* Centraliza o botão */
+    margin-right: auto; /* Centraliza o botão */
+    margin-top: 25px; /* Aumenta o espaço acima do botão */
     background-color: var(--accent-blue);
     color: var(--bg-dark);
     font-size: 1.1em;
     font-weight: 600;
     border: none;
-    padding: 14px 30px;
+    padding: 14px 20px;
     border-radius: 6px;
     cursor: pointer;
+    text-align: center;
     transition: background-color 0.2s ease;
-    width: 100%;
-    grid-column: 1 / -1;
 }
 
-form button:hover {
+form > button[type="submit"]:hover {
     background-color: #82c8ff;
 }
 
-/* NOVA REGRA: Em telas com largura de até 1024px, o formulário vira uma coluna só */
-@media (max-width: 1024px) {
+/* Responsividade para Telas Menores */
+@media (max-width: 768px) {
     .form-grid {
         grid-template-columns: 1fr;
+        gap: 0;
     }
+}
+/* --- Estilos para Botões de Ação (Salvar/Cancelar) na página de edição --- */
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end; /* Alinha os botões à direita */
+    gap: 15px; /* Cria um espaço entre os botões */
+    margin-top: 30px; /* Adiciona um espaço acima da área dos botões */
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color); /* Linha divisória sutil */
+}
+
+/* Estilo base para ambos os botões */
+.form-actions .save-button,
+.form-actions .cancel-button {
+    padding: 12px 28px;
+    font-size: 1em;
+    font-weight: 600;
+    border-radius: 6px;
+    text-decoration: none;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+/* Estilo do botão principal "Salvar Alterações" */
+.form-actions .save-button {
+    background-color: var(--accent-blue);
+    color: var(--bg-dark);
+    border-color: var(--accent-blue);
+}
+
+.form-actions .save-button:hover {
+    background-color: #82c8ff;
+    border-color: #82c8ff;
+    transform: translateY(-2px); /* Efeito de elevação sutil */
+}
+
+/* Estilo do botão secundário "Cancelar" */
+.form-actions .cancel-button {
+    background-color: transparent;
+    color: var(--text-secondary);
+    border-color: var(--border-color);
+}
+
+.form-actions .cancel-button:hover {
+    background-color: var(--border-color);
+    color: var(--text-primary);
 }
