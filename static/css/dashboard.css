@@ -1,0 +1,228 @@
+/* static/css/dashboard.css */
+
+/* Container do cabeçalho do dashboard para melhor controle de layout */
+.dashboard-header-container {
+    display: flex; /* Usa flexbox para alinhar itens */
+    flex-wrap: wrap; /* Permite que itens quebrem para a próxima linha */
+    justify-content: space-between; /* Espaça o título/subtítulo e a saudação */
+    align-items: flex-start; /* Alinha itens ao topo */
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+    text-align: left; /* Alinha o texto do título à esquerda por padrão */
+}
+
+/* Título principal do dashboard */
+.dashboard-header-container h1 {
+    margin-bottom: 10px;
+    flex-basis: 100%; /* Ocupa a largura total em uma linha separada */
+    text-align: left; /* Garante alinhamento à esquerda */
+}
+
+/* Subtítulo do dashboard */
+.dashboard-header-container .subtitle {
+    margin-bottom: 0;
+    flex-basis: 100%; /* Ocupa a largura total em uma linha separada */
+    text-align: left; /* Garante alinhamento à esquerda */
+}
+
+/* Estilo para a saudação do usuário */
+.user-greeting {
+    /* Removendo position: absolute; para melhor fluxo responsivo */
+    font-size: 1.1em;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    white-space: nowrap;
+    text-align: right; /* Alinha o texto à direita dentro do seu próprio espaço */
+    flex-shrink: 0; /* Evita que o texto encolha */
+    margin-left: auto; /* Empurra para a direita quando há espaço */
+    align-self: flex-start; /* Alinha ao topo dentro do flex container */
+}
+
+/* Grid principal do dashboard */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1.5fr; /* Layout padrão para desktop */
+    grid-template-rows: auto;
+    gap: 30px;
+}
+
+/* Estilos para os cartões (cards) */
+.dashboard-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 25px;
+}
+
+/* Card de Estatística */
+.stat-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+}
+
+.stat-card h3 {
+    font-size: 1.1em;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 15px;
+}
+
+.stat-card .stat-number {
+    font-size: 4em;
+    font-weight: 700;
+    color: var(--accent-blue);
+    line-height: 1;
+}
+
+.stat-card .stat-description {
+    font-size: 1em;
+    color: var(--text-secondary);
+}
+
+/* Card do Gráfico */
+.chart-card h3 {
+    text-align: center;
+    font-size: 1.1em;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+}
+
+.chart-container {
+    position: relative;
+    height: 250px;
+}
+
+/* Card de Atividade Recente */
+.activity-card h3 {
+    font-size: 1.1em;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+}
+
+.activity-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.activity-list li a {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-color);
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+}
+.activity-list li:last-child a {
+    border-bottom: none;
+}
+.activity-list li a:hover {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+.activity-list .no-activity {
+    color: var(--text-secondary);
+    padding: 20px 0;
+}
+
+.activity-list img {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--border-color);
+}
+
+.activity-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.activity-info .activity-name {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+.activity-info .activity-time {
+    font-size: 0.9em;
+    color: var(--text-secondary);
+}
+
+/* --- Media Queries para Responsividade --- */
+
+/* Telas médias (tablets em paisagem, laptops menores) */
+@media (max-width: 1200px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr 1fr; /* Duas colunas */
+    }
+    .activity-card {
+        grid-column: 1 / -1; /* Ocupa a largura total abaixo dos outros dois */
+    }
+}
+
+/* Telas pequenas (tablets em retrato, celulares) */
+@media (max-width: 768px) {
+    .dashboard-header-container {
+        flex-direction: column; /* Empilha título, subtítulo e saudação */
+        align-items: center; /* Centraliza todos os itens */
+        text-align: center; /* Centraliza o texto */
+    }
+
+    .dashboard-header-container h1,
+    .dashboard-header-container .subtitle {
+        text-align: center; /* Garante centralização em telas pequenas */
+    }
+
+    .user-greeting {
+        position: static; /* Remove o posicionamento absoluto */
+        margin-top: 15px; /* Adiciona espaço acima quando empilhado */
+        text-align: center; /* Centraliza o texto da saudação */
+        width: 100%; /* Ocupa a largura total */
+        font-size: 1em; /* Ajusta o tamanho da fonte */
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 1fr; /* Tudo vira uma coluna só */
+    }
+
+    .dashboard-card {
+        padding: 20px; /* Reduz o padding dos cartões */
+    }
+
+    .stat-card .stat-number {
+        font-size: 3.5em; /* Reduz o tamanho do número estatístico */
+    }
+}
+
+/* Telas muito pequenas (celulares menores) */
+@media (max-width: 480px) {
+    .dashboard-header-container {
+        margin-bottom: 30px;
+        padding-bottom: 15px;
+    }
+    h1 {
+        font-size: 2em; /* Reduz o tamanho do título principal */
+    }
+    p.subtitle {
+        font-size: 1em; /* Reduz o tamanho do subtítulo */
+    }
+    .dashboard-card {
+        padding: 15px; /* Reduz ainda mais o padding dos cartões */
+    }
+    .stat-card .stat-number {
+        font-size: 3em; /* Reduz o tamanho do número estatístico */
+    }
+}

@@ -1,0 +1,235 @@
+/* static/css/my_account.css (Estilo Final para a página Minha Conta: Compacto e Sem Rolagem) */
+
+/* Importa as variáveis de cor e fonte do base.css para consistência do tema */
+@import url('base.css'); 
+
+/* Importar fonte Roboto para melhor legibilidade (se não estiver em base.css) */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+/* Estilos para o container principal do formulário */
+.form-panel {
+    background-color: var(--card-bg); /* Fundo sólido do cartão */
+    border: 1px solid var(--border-color); /* Borda do cartão */
+    border-radius: 12px; /* Bordas arredondadas */
+    padding: 25px 30px; /* MUDANÇA AQUI: Padding reduzido para economizar espaço */
+    margin-top: 30px; /* MUDANÇA AQUI: Margem superior reduzida */
+    margin-bottom: 30px; /* MUDANÇA AQUI: Margem inferior reduzida */
+    max-width: 500px; /* MUDANÇA AQUI: Largura compacta, similar à tela de redefinição */
+    width: 95%; /* Adaptação para telas menores */
+    margin-left: auto; /* Centraliza horizontalmente */
+    margin-right: auto; /* Centraliza horizontalmente */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+    /* Animação de entrada removida para um carregamento mais direto, se desejado */
+    /* animation: fadeInScale 0.8s ease-out; */ 
+}
+
+/* @keyframes fadeInScale (removido se a animação for removida do .form-panel) */
+
+/* Títulos da página (h1, p.subtitle) - herdados de base.css, mas centralizados aqui */
+h1, p.subtitle {
+    text-align: center;
+    color: var(--text-primary);
+}
+h1 {
+    font-size: 2.2em; /* MUDANÇA AQUI: Título menor para caber na tela */
+    margin-bottom: 10px; /* MUDANÇA AQUI: Margem reduzida */
+    /* text-shadow: 0 0 10px rgba(88, 166, 255, 0.3); */ /* Sombra de texto removida para nitidez */
+}
+p.subtitle {
+    font-size: 0.95em; /* MUDANÇA AQUI: Subtítulo menor para caber na tela */
+    color: var(--text-secondary);
+    margin-bottom: 30px; /* MUDANÇA AQUI: Margem reduzida */
+}
+
+
+/* Grupo de formulário (label + input) */
+.form-group {
+    margin-bottom: 18px; /* MUDANÇA AQUI: Espaço entre campos reduzido */
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px; /* MUDANÇA AQUI: Espaço entre label e input reduzido */
+    font-weight: 600;
+    font-size: 0.95em; /* MUDANÇA AQUI: Fonte da label um pouco menor */
+    color: var(--text-secondary); /* MUDANÇA AQUI: Cor da label mais suave */
+}
+
+/* Estilo para todos os inputs de texto e senha */
+.form-panel input[type="text"],
+.form-panel input[type="password"] {
+    width: 100%;
+    padding: 12px; /* MUDANÇA AQUI: Padding reduzido */
+    font-size: 1em; /* MUDANÇA AQUI: Fonte padrão */
+    border-radius: 6px; /* MUDANÇA AQUI: Bordas menos arredondadas */
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, background-color 0.15s ease;
+}
+
+/* Placeholder styling */
+.form-panel input::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+/* Efeito de foco nos inputs */
+.form-panel input:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.2);
+    background-color: var(--bg-dark); /* MUDANÇA AQUI: Mantém o fundo escuro ao focar */
+}
+
+/* Botão de gerar senha aleatória */
+.form-panel .generate-btn {
+    display: block;
+    width: 100%;
+    padding: 10px; /* MUDANÇA AQUI: Padding reduzido */
+    font-size: 0.95em; /* MUDANÇA AQUI: Fonte menor */
+    font-weight: 600;
+    border-radius: 6px; /* MUDANÇA AQUI: Bordas menos arredondadas */
+    border: 1px solid var(--border-color); /* MUDANÇA AQUI: Borda neutra */
+    background-color: var(--border-color); /* MUDANÇA AQUI: Fundo neutro */
+    color: var(--text-secondary); /* MUDANÇA AQUI: Texto neutro */
+    cursor: pointer;
+    transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out, transform 0.15s ease;
+}
+
+.form-panel .generate-btn:hover {
+    background-color: #444c56; /* MUDANÇA AQUI: Hover mais sutil */
+    color: var(--text-primary);
+    transform: translateY(-1px); /* MUDANÇA AQUI: Elevação menor */
+}
+
+/* Caixa de exibição da senha gerada */
+.credentials-display {
+    background-color: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    padding: 15px; /* MUDANÇA AQUI: Padding reduzido */
+    margin-top: 15px;
+    margin-bottom: 25px; /* MUDANÇA AQUI: Margem reduzida */
+    border-radius: 8px;
+    box-shadow: none; /* MUDANÇA AQUI: Sombra interna removida */
+}
+
+.credential-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px; /* MUDANÇA AQUI: Margem reduzida */
+}
+
+.credential-item:last-child {
+    margin-bottom: 0;
+}
+
+.credential-item strong {
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.credential-item span {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1em; /* MUDANÇA AQUI: Senha menor */
+    color: var(--text-primary); /* MUDANÇA AQUI: Cor padrão do texto */
+}
+
+/* Linha divisória no formulário (para separar senha atual) */
+.form-divider {
+    border: none;
+    border-top: 1px solid var(--border-color); /* MUDANÇA AQUI: Linha sólida */
+    margin: 30px 0; /* MUDANÇA AQUI: Espaço reduzido */
+}
+
+/* Container para botões de ação (Cancelar, Salvar Alterações) */
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px; /* MUDANÇA AQUI: Espaço entre botões reduzido */
+    margin-top: 30px; /* MUDANÇA AQUI: Espaço superior reduzido */
+    padding-top: 20px; /* MUDANÇA AQUI: Padding superior reduzido */
+    border-top: 1px solid var(--border-color);
+}
+
+/* Botão principal de Salvar Alterações */
+.form-actions .save-button {
+    background-color: var(--accent-blue);
+    color: var(--bg-dark);
+    font-size: 1em; /* MUDANÇA AQUI: Botão menor */
+    font-weight: 600;
+    padding: 12px 25px; /* MUDANÇA AQUI: Padding reduzido */
+    border-radius: 6px; /* MUDANÇA AQUI: Bordas menos arredondadas */
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.15s ease-in-out, transform 0.15s ease, box-shadow 0.15s ease;
+    box-shadow: none; /* MUDANÇA AQUI: Sombra removida */
+}
+
+.form-actions .save-button:hover {
+    background-color: #82c8ff;
+    transform: translateY(-1px); /* MUDANÇA AQUI: Elevação menor */
+    box-shadow: none; /* MUDANÇA AQUI: Sombra removida */
+}
+
+/* Botão de Cancelar */
+.form-actions .cancel-button {
+    background-color: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    font-size: 1em; /* MUDANÇA AQUI: Botão menor */
+    font-weight: 600;
+    padding: 12px 25px; /* MUDANÇA AQUI: Padding reduzido */
+    border-radius: 6px; /* MUDANÇA AQUI: Bordas menos arredondadas */
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.15s ease-in-out, border-color 0.15s ease-in-out, background-color 0.15s ease, transform 0.15s ease;
+}
+
+.form-actions .cancel-button:hover {
+    color: var(--text-primary);
+    background-color: var(--border-color);
+    transform: translateY(-1px); /* MUDANÇA AQUI: Elevação menor */
+}
+
+/* --- Responsividade para telas pequenas --- */
+@media (max-width: 600px) {
+    .form-panel {
+        padding: 20px;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        max-width: 100%;
+        border-radius: 8px; /* MUDANÇA AQUI: Bordas mais arredondadas em mobile */
+    }
+    h1 {
+        font-size: 1.8em; /* MUDANÇA AQUI: Título menor em mobile */
+    }
+    p.subtitle {
+        font-size: 0.85em; /* MUDANÇA AQUI: Subtítulo menor em mobile */
+        margin-bottom: 20px; /* MUDANÇA AQUI: Margem reduzida */
+    }
+    .form-group {
+        margin-bottom: 15px; /* MUDANÇA AQUI: Espaço entre campos reduzido */
+    }
+    .form-panel input[type="text"],
+    .form-panel input[type="password"] {
+        padding: 10px; /* MUDANÇA AQUI: Padding menor em mobile */
+        font-size: 0.95em; /* MUDANÇA AQUI: Fonte menor em mobile */
+    }
+    .form-panel .generate-btn {
+        padding: 10px;
+        font-size: 0.9em;
+    }
+    .form-actions {
+        flex-direction: column;
+        gap: 8px; /* MUDANÇA AQUI: Espaço entre botões reduzido */
+    }
+    .form-actions .save-button,
+    .form-actions .cancel-button {
+        width: 100%;
+        text-align: center;
+        padding: 12px; /* MUDANÇA AQUI: Padding menor em mobile */
+        font-size: 0.95em; /* MUDANÇA AQUI: Fonte menor em mobile */
+    }
+}

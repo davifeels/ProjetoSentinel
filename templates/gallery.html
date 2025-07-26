@@ -1,0 +1,96 @@
+{% extends "layout.html" %}
+
+{% block title %}Banco de Dados | SentinelVision{% endblock %}
+
+{% block head_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/gallery.css') }}">
+{% endblock %}
+
+{% block content %}
+    <h1>Banco de Dados de Perfis</h1>
+    <p class="subtitle">Visualize e gerencie todos os indivíduos atualmente monitorados pelo sistema.</p>
+
+    <div class="search-bar-container">
+        <form method="GET" action="{{ url_for('gallery') }}">
+            <input type="text" name="query" placeholder="Buscar por nome, documento, endereço, status..." value="{{ search_query or '' }}">
+            <button type="submit">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <span>Buscar</span>
+            </button>
+        </form>
+    </div>
+
+    {# REMOVIDO: O bloco de mensagens flash duplicado. O layout.html já lida com isso. #}
+    {#
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    #}
+
+    <div class="profile-grid" id="profile-grid-container">
+        {% for person in people.items %}
+        <a href="{{ url_for('person_detail', person_id=person.id) }}" class="profile-card-link">
+            <div class="profile-card">
+                
+                {# --- LÓGICA ATUALIZADA PARA ENCONTRAR A FOTO DE PERFIL --- #}
+                {% set profile_photo = person.photos|selectattr('photo_type', 'equalto', 'profile')|first %}
+                
+                {% if profile_photo %}
+                    <img src="{{ url_for('static', filename='db_images/' + profile_photo.filename) }}" alt="Foto de {{ person.name }}">
+                {% else %}
+                    <div class="placeholder-image">Sem Foto</div>
+                {% endif %}
+
+                <div class="card-content">
+                    <h3>{{ person.name }}</h3>
+                    <div class="profile-details">
+                        <p><strong>Status:</strong> <span class="status-{{ person.status | lower | replace(' ', '-') }}">{{ person.status }}</span></p>
+                    </div>
+                </div>
+            </div>
+        </a>
+        {% else %}
+            {% if search_query %}
+                <p class="no-results">Nenhum resultado encontrado para "<strong>{{ search_query }}</strong>".</p>
+            {% else %}
+                <p class="no-results">Nenhum perfil cadastrado. <a href="{{ url_for('register') }}" class="link-styled">Clique aqui para cadastrar o primeiro!</a></p>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    {% if people.pages > 1 %}
+    <div class="pagination">
+        <a href="{{ url_for('gallery', page=people.prev_num, query=search_query) if people.has_prev else '#' }}" class="page-link {{ 'disabled' if not people.has_prev }}">&laquo; Anterior</a>
+        
+        {% for page_num in people.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+            {% if page_num %}
+                <a href="{{ url_for('gallery', page=page_num, query=search_query) }}" class="page-link {{ 'active' if page_num == people.page }}">{{ page_num }}</a>
+            {% else %}
+                <span class="page-link-ellipsis">...</span>
+            {% endif %}
+        {% endfor %}
+
+        <a href="{{ url_for('gallery', page=people.next_num, query=search_query) if people.has_next else '#' }}" class="page-link {{ 'disabled' if not people.has_next }}">Próximo &raquo;</a>
+    </div>
+    {% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// O script de efeito do mouse continua o mesmo
+document.getElementById('profile-grid-container').addEventListener('mousemove', e => {
+    for(const card of document.getElementsByClassName('profile-card')) {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        card.style.setProperty('--mouse-x', `${x}px`);
+        card.style.setProperty('--mouse-y', `${y}px`);
+    }
+});
+</script>
+{% endblock %}

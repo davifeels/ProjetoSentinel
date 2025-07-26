@@ -1,0 +1,116 @@
+{% extends "layout.html" %}
+
+{% block title %}Cadastro | SentinelVision{% endblock %}
+
+{% block head_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/register.css') }}">
+{% endblock %}
+
+{% block content %}
+    <h1>Ingestão de Novos Dados Biométricos</h1>
+    <p class="subtitle">Preencha os campos para adicionar um novo indivíduo ao sistema de vigilância.</p>
+
+    <div class="register-form-panel">
+        <form method="POST" enctype="multipart/form-data">
+            <div class="form-grid">
+                <div class="form-column">
+                    <h3>Dados Principais</h3>
+                    <div class="form-group">
+                        <label for="name">Nome Completo do Indivíduo *</label>
+                        <input id="name" type="text" name="name" placeholder="Obrigatório" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="image">Arquivo de Imagem Facial *</label>
+                        <div class="custom-file-input">
+                            <input id="image" type="file" name="image" accept="image/*" required class="input-file">
+                            <label for="image" class="btn-file">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                                <span>Escolher arquivo</span>
+                            </label>
+                            <span id="file-chosen-text" class="file-chosen-text">Nenhum arquivo escolhido</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="status">Status</label>
+                        <select id="status" name="status">
+                            <option value="Em Observação" selected>Em Observação</option>
+                            <option value="Ativo">Ativo</option>
+                            <option value="Procurado">Procurado</option>
+                            <option value="Inativo">Inativo</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="doc_number">Nº de Documento</label>
+                        <input id="doc_number" type="text" name="doc_number" placeholder="Ex: CPF ou RG">
+                    </div>
+                    <div class="form-group">
+                        <label for="date_of_birth">Data de Nascimento</label>
+                        <input id="date_of_birth" type="date" name="date_of_birth">
+                    </div>
+                    <div class="form-group">
+                        <label for="gender">Gênero</label>
+                        <input id="gender" type="text" name="gender" placeholder="Ex: Masculino, Feminino">
+                    </div>
+                </div>
+
+                <div class="form-column">
+                    <h3>Contatos e Parentesco</h3>
+                    <div class="form-group">
+                        <label for="phones">Telefone(s)</label>
+                        <input id="phones" type="text" name="phones" placeholder="Separados por vírgula">
+                    </div>
+                    <div class="form-group">
+                        <label for="emails">E-mail(s)</label>
+                        <input id="emails" type="text" name="emails" placeholder="Separados por vírgula">
+                    </div>
+                    <div class="form-group">
+                        <label for="address">Endereço Completo</label>
+                        <textarea id="address" name="address" rows="3" placeholder="Rua, Número, Bairro, Cidade - UF"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="father_name">Nome do Pai</label>
+                        <input id="father_name" type="text" name="father_name">
+                    </div>
+                    <div class="form-group">
+                        <label for="mother_name">Nome da Mãe</label>
+                        <input id="mother_name" type="text" name="mother_name">
+                    </div>
+                    <div class="form-group">
+                        <label for="spouse">Cônjuge(s)</label>
+                        <input id="spouse" type="text" name="spouse" placeholder="Separados por vírgula">
+                    </div>
+                    <div class="form-group">
+                        <label for="children">Filho(s)</label>
+                        <textarea id="children" name="children" rows="2" placeholder="Separados por vírgula"></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group" style="grid-column: 1 / -1; margin-top: 20px;">
+                <label for="notes">Observações</label>
+                <textarea id="notes" name="notes" rows="5" placeholder="Qualquer informação relevante..."></textarea>
+            </div>
+
+            <button type="submit">Registrar no Sistema</button>
+        </form>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('image');
+    const fileChosenText = document.getElementById('file-chosen-text');
+
+    fileInput.addEventListener('change', function() {
+        if (this.files.length > 0) {
+            fileChosenText.textContent = this.files[0].name;
+        } else {
+            fileChosenText.textContent = 'Nenhum arquivo escolhido';
+        }
+    });
+});
+</script>
+{% endblock %}

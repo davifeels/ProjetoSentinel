@@ -1,0 +1,89 @@
+{% extends "layout.html" %}
+
+{% block title %}Editar Dossiê: {{ person.name }}{% endblock %}
+
+{% block head_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/register.css') }}">
+{% endblock %}
+
+{% block content %}
+    <h1>Editar Dossiê de {{ person.name }}</h1>
+    <p class="subtitle">Atualize as informações do indivíduo e salve as alterações.</p>
+
+    <div class="register-form-panel">
+        <form method="POST" action="{{ url_for('edit_person', person_id=person.id) }}">
+            <div class="form-grid">
+                <div class="form-column">
+                    <h3>Dados Pessoais</h3>
+                    <div class="form-group">
+                        <label for="name">Nome Completo *</label>
+                        <input id="name" type="text" name="name" value="{{ person.name }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="status">Status</label>
+                        <select id="status" name="status">
+                            <option value="Em Observação" {% if person.status == 'Em Observação' %}selected{% endif %}>Em Observação</option>
+                            <option value="Ativo" {% if person.status == 'Ativo' %}selected{% endif %}>Ativo</option>
+                            <option value="Procurado" {% if person.status == 'Procurado' %}selected{% endif %}>Procurado</option>
+                            <option value="Inativo" {% if person.status == 'Inativo' %}selected{% endif %}>Inativo</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="doc_number">Nº de Documento</label>
+                        <input id="doc_number" type="text" name="doc_number" value="{{ person.doc_number or '' }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="date_of_birth">Data de Nascimento</label>
+                        <input id="date_of_birth" type="date" name="date_of_birth" value="{{ person.date_of_birth or '' }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="gender">Gênero</label>
+                        <input id="gender" type="text" name="gender" value="{{ person.gender or '' }}">
+                    </div>
+                     <div class="form-group">
+                        <label for="address">Endereço Completo</label>
+                        <textarea id="address" name="address" rows="3">{{ person.address or '' }}</textarea>
+                    </div>
+                </div>
+
+                <div class="form-column">
+                    <h3>Contatos e Parentesco</h3>
+                    <div class="form-group">
+                        <label for="phones">Telefone(s)</label>
+                        <input id="phones" type="text" name="phones" placeholder="Separados por vírgula" value="{{ person.phones or '' }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="emails">E-mail(s)</label>
+                        <input id="emails" type="text" name="emails" placeholder="Separados por vírgula" value="{{ person.emails or '' }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="father_name">Nome do Pai</label>
+                        <input id="father_name" type="text" name="father_name" value="{{ person.father_name or '' }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="mother_name">Nome da Mãe</label>
+                        <input id="mother_name" type="text" name="mother_name" value="{{ person.mother_name or '' }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="spouse">Cônjuge(s)</label>
+                        <input id="spouse" type="text" name="spouse" placeholder="Separados por vírgula" value="{{ person.spouse or '' }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="children">Filho(s)</label>
+                        <textarea id="children" name="children" rows="2" placeholder="Separados por vírgula">{{ person.children or '' }}</textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group" style="grid-column: 1 / -1;">
+                <label for="notes">Observações</label>
+                <textarea id="notes" name="notes" rows="5">{{ person.notes or '' }}</textarea>
+            </div>
+
+            <div class="form-actions">
+                <a href="{{ url_for('person_detail', person_id=person.id) }}" class="cancel-button">Cancelar</a>
+                <button type="submit" class="save-button">Salvar Alterações</button>
+            </div>
+        </form>
+    </div>
+{% endblock %}

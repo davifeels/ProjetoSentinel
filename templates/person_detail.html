@@ -1,0 +1,95 @@
+{% extends "layout.html" %}
+
+{% block title %}Galeria: {{ person.name }}{% endblock %}
+
+{% block head_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/detail_gallery.css') }}">
+{% endblock %}
+
+{% block content %}
+    <div class="detail-header">
+        <h1>Galeria do Indivíduo</h1>
+        <a href="{{ url_for('gallery') }}" class="back-link">&laquo; Voltar para a Galeria Principal</a>
+    </div>
+
+    <div class="dossier-grid">
+        <div class="dossier-info-panel">
+            <div class="dossier-main-info">
+                {% set profile_photo = person.photos|selectattr('photo_type', 'equalto', 'profile')|first %}
+                {% if profile_photo %}
+                    <img src="{{ url_for('static', filename='db_images/' + profile_photo.filename) }}" alt="Foto de {{ person.name }}">
+                {% endif %}
+                <h2>{{ person.name }}</h2>
+                <p>Status: <span class="status-{{ person.status|lower|replace(' ', '-') }}">{{ person.status }}</span></p>
+            </div>
+            
+            <div class="dossier-actions">
+                <a href="{{ url_for('edit_person', person_id=person.id) }}" class="edit-button">Editar Dossiê</a>
+                <form action="{{ url_for('delete', person_id=person.id) }}" method="POST" onsubmit="return confirm('ATENÇÃO: Deseja deletar permanentemente o perfil de {{ person.name }}?');">
+                    <button type="submit" class="delete-button">Deletar Perfil</button>
+                </form>
+            </div>
+            
+            <div class="dossier-details">
+                <h3>Detalhes Pessoais</h3>
+                <ul>
+                    <li><strong>Nº Documento:</strong> <span>{{ person.doc_number or 'Não informado' }}</span></li>
+                    <li><strong>Data de Nasc.:</strong> <span>{{ person.date_of_birth.strftime('%d/%m/%Y') if person.date_of_birth else 'Não informado' }}</span></li>
+                    <li><strong>Gênero:</strong> <span>{{ person.gender or 'Não informado' }}</span></li>
+                    <li><strong>Endereço:</strong> <span>{{ person.address or 'Não informado' }}</span></li>
+                </ul>
+                <h3>Contatos</h3>
+                <ul>
+                    <li><strong>Telefone(s):</strong> <span>{{ person.phones or 'Não informado' }}</span></li>
+                    <li><strong>E-mail(s):</strong> <span>{{ person.emails or 'Não informado' }}</span></li>
+                </ul>
+                <h3>Parentesco</h3>
+                <ul>
+                    <li><strong>Pai:</strong> <span>{{ person.father_name or 'Não informado' }}</span></li>
+                    <li><strong>Mãe:</strong> <span>{{ person.mother_name or 'Não informado' }}</span></li>
+                    <li><strong>Cônjuge(s):</strong> <span>{{ person.spouse or 'Não informado' }}</span></li>
+                    <li><strong>Filho(s):</strong> <span>{{ person.children or 'Não informado' }}</span></li>
+                </ul>
+                <h3>Observações</h3>
+                <div class="notes-box">
+                    <p>{{ person.notes or "Nenhuma observação registrada." }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="gallery-panel">
+            <h3>Histórico de Avistamentos</h3>
+            <div class="sighting-gallery">
+                {% for photo in person.photos if photo.photo_type == 'sighting' %}
+                    <div class="sighting-card">
+                        <a href="{{ url_for('static', filename='sighting_images/' + photo.filename) }}" target="_blank">
+                            <img src="{{ url_for('static', filename='sighting_images/' + photo.filename) }}" alt="Avistamento de {{ person.name }}">
+                        </a>
+                        <small>{{ photo.upload_date.strftime('%d/%m/%Y %H:%M') }}</small>
+                    </div>
+                {% else %}
+                    <p>Nenhum avistamento registrado.</p>
+                {% endfor %}
+            </div>
+
+            <h3 class="similar-title">Rostos Semelhantes Encontrados</h3>
+            <div class="similar-faces-gallery">
+                {% for similar in similar_people %}
+                <a href="{{ url_for('person_detail', person_id=similar.id) }}" class="profile-card-link">
+                    <div class="profile-card">
+                        {% set sim_profile_photo = similar.photos|selectattr('photo_type', 'equalto', 'profile')|first %}
+                        {% if sim_profile_photo %}
+                            <img src="{{ url_for('static', filename='db_images/' + sim_profile_photo.filename) }}" alt="Foto de {{ similar.name }}">
+                        {% endif %}
+                        <div class="card-content">
+                            <h4>{{ similar.name }}</h4>
+                        </div>
+                    </div>
+                </a>
+                {% else %}
+                    <p>Nenhum perfil semelhante encontrado.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

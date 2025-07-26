@@ -1,0 +1,283 @@
+/* static/css/search.css (Versão Final - Moderna e Responsiva) */
+
+/* Centraliza o conteúdo principal e adiciona espaçamento */
+.content-wrapper {
+    width: 100%;
+    max-width: 700px;
+    text-align: center;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 20px; /* Garante margens laterais em telas pequenas */
+}
+
+/* Títulos da página */
+h1 {
+    font-family: var(--font-heading);
+    color: var(--text-primary);
+    margin-bottom: 15px;
+    letter-spacing: 1px;
+    text-shadow: 0 0 10px rgba(88, 166, 255, 0.3);
+}
+
+p.subtitle {
+    color: var(--text-secondary);
+    font-size: 1.1em;
+    margin-bottom: 40px;
+    max-width: 500px;
+    line-height: 1.5;
+}
+
+/* Painel de busca principal */
+.search-panel {
+    background: var(--card-bg);
+    border: 1px solid var(--accent-blue);
+    border-radius: 12px;
+    padding: 30px 40px;
+    width: 100%;
+    box-shadow: 0 0 30px rgba(88, 166, 255, 0.2);
+    animation: pulse-glow 5s infinite alternate;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+}
+
+/* Animação de brilho para o painel */
+@keyframes pulse-glow {
+    from {
+        border-color: var(--accent-blue);
+        box-shadow: 0 0 30px rgba(88, 166, 255, 0.2);
+    }
+    to {
+        border-color: #82c8ff; /* Tom mais claro */
+        box-shadow: 0 0 40px rgba(130, 200, 255, 0.4);
+    }
+}
+
+.form-group {
+    margin-bottom: 25px;
+    text-align: left;
+}
+
+.form-group > label { /* Seleciona apenas o label principal do grupo */
+    font-weight: 600;
+    font-size: 0.9em;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+    display: block;
+}
+
+/* --- Estilização do upload de arquivo --- */
+input[type="file"] {
+    display: none; /* Esconde o input original */
+}
+
+.custom-file-upload {
+    border: 2px dashed var(--border-color);
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 35px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.custom-file-upload:hover {
+    border-color: var(--accent-blue);
+    background-color: rgba(88, 166, 255, 0.05);
+}
+
+.custom-file-upload-text {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.file-chosen-text {
+    text-align: center;
+    margin-top: 15px;
+    color: var(--accent-green);
+    font-weight: 600;
+    font-size: 0.9em;
+    height: 20px; /* Altura fixa para evitar que o layout pule */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* --- Botão principal de ação --- */
+.search-panel button {
+    width: 100%;
+    padding: 15px;
+    font-size: 1.1em;
+    font-weight: 700;
+    font-family: var(--font-heading);
+    color: #0d1117; /* Texto escuro para contraste */
+    background: var(--accent-blue);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    letter-spacing: 1px;
+}
+
+.search-panel button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(88, 166, 255, 0.25);
+    background-color: #82c8ff;
+}
+
+/* Estilo para o input de busca por texto */
+#text-query {
+    background-color: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 12px;
+    border-radius: 6px;
+    width: 100%;
+    font-size: 1em;
+}
+#text-query:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+}
+
+/* --- Link de alternância --- */
+.search-toggle a {
+    color: var(--text-secondary);
+    font-weight: 600;
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+    transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.search-toggle a:hover {
+    color: var(--accent-blue);
+    border-bottom-color: var(--accent-blue);
+}
+
+/* --- Seção de Resultado (Onde a imagem e o nome aparecerão) --- */
+.result-container {
+    width: 100%;
+    max-width: 600px; /* Ajuste conforme desejar a largura máxima */
+    margin-top: 40px; /* Espaçamento da seção de busca */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 150px; /* Altura mínima para o spinner/mensagens */
+}
+
+.result-card {
+    /* MUDANÇA AQUI: Removido todo o estilo de "caixa" do result-card */
+    background: transparent; /* Fundo transparente */
+    border: none; /* Sem borda */
+    border-radius: 0; /* Sem arredondamento */
+    padding: 0; /* Sem padding */
+    width: auto; /* Largura automática para se ajustar ao conteúdo */
+    box-shadow: none; /* Sem sombra */
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px; /* Mantém o espaçamento entre a imagem e o nome */
+    animation: fade-in 0.5s ease-out; /* Animação ao aparecer */
+}
+
+@keyframes fade-in {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Garante que nenhum h2 inesperado apareça no quadro do resultado */
+.result-card h2 {
+    display: none; 
+}
+
+.result-card img {
+    max-width: 200px; /* Tamanho máximo da imagem no quadro */
+    max-height: 200px;
+    width: 200px; /* Garante que a imagem seja um quadrado perfeito */
+    height: 200px; /* Garante que a imagem seja um quadrado perfeito */
+    object-fit: cover; /* Garante que a imagem preencha o quadrado sem distorcer */
+    border-radius: 0; /* MUDANÇA AQUI: Remove o arredondamento, tornando-a quadrada */
+    border: 2px solid var(--border-color); /* Borda como um quadro ao redor da imagem */
+    box-shadow: none; /* Removido qualquer brilho extra da imagem */
+    transition: transform 0.3s ease;
+}
+
+.result-card img:hover {
+    transform: scale(1.05); /* Efeito de zoom ao passar o mouse */
+}
+
+.result-card .result-name {
+    font-size: 1.4em;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-top: 5px;
+}
+
+.result-card a { /* Estilo para o link da imagem/nome */
+    color: var(--accent-blue);
+    text-decoration: none;
+    font-weight: 600;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.result-card a:hover {
+    text-decoration: underline;
+}
+
+/* Estilos para mensagens de alerta dentro do result-container */
+.result-container .alert {
+    width: 100%;
+    margin: 0; /* Remove margens padrão */
+    text-align: center;
+}
+.result-container .alert-error { border-color: var(--accent-red); background-color: rgba(248, 81, 73, 0.1); color: #ffa198; }
+.result-container .alert-info { border-color: var(--accent-blue); background-color: rgba(88, 166, 255, 0.1); color: #79c0ff; }
+
+
+/* Estilos para o spinner de carregamento */
+.loading-spinner {
+    border: 6px solid rgba(255, 255, 255, 0.1);
+    border-top: 6px solid var(--accent-blue);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+    margin: 30px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* --- Design Responsivo para Dispositivos Móveis --- */
+@media (max-width: 600px) {
+    h1 {
+        font-size: 2em;
+    }
+    p.subtitle {
+        font-size: 1em;
+    }
+    .search-panel {
+        padding: 20px;
+        animation: none;
+    }
+    .custom-file-upload {
+        padding: 25px;
+    }
+    #text-search-panel form {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    .result-card {
+        padding: 0; /* Remove padding também em telas pequenas */
+    }
+}

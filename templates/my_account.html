@@ -1,0 +1,79 @@
+{% extends "layout.html" %}
+
+{% block title %}Minha Conta | SentinelVision{% endblock %}
+
+{% block head_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/my_account.css') }}"> 
+{% endblock %}
+
+{% block content %}
+    <h1>Minha Conta</h1>
+    <p class="subtitle">Gerencie suas informações de login.</p>
+
+    <div class="form-panel">
+        <form method="POST" action="{{ url_for('my_account') }}">
+            <div class="form-group">
+                <label for="username">Nome de Usuário</label>
+                <input id="username" type="text" name="username" value="{{ current_user.username }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="current_password">Senha Atual *</label>
+                <input id="current_password" type="password" name="current_password" required placeholder="Confirme sua senha atual">
+            </div>
+
+            <div class="form-group">
+                <label for="new_password">Nova Senha (opcional)</label>
+                <input id="new_password" type="password" name="new_password" minlength="6" placeholder="Deixe em branco para manter a senha atual" autocomplete="new-password">
+            </div>
+            
+            <div class="form-group">
+                <label>Gerar Nova Senha Aleatória</label>
+                <button type="button" id="generate-new-password-btn" class="generate-btn">
+                    Gerar Senha
+                </button>
+            </div>
+
+            <div id="generated-password-display" class="credentials-display" style="display: none;">
+                </div>
+
+            <div class="form-actions">
+                <a href="{{ url_for('dashboard') }}" class="cancel-button">Cancelar</a>
+                <button type="submit" class="save-button">Salvar Alterações</button>
+            </div>
+        </form>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const generateBtn = document.getElementById('generate-new-password-btn'); 
+    const passwordInput = document.getElementById('new_password'); 
+    const displayDiv = document.getElementById('generated-password-display'); 
+
+    function generateRandomString(length, chars) {
+        let result = '';
+        for (let i = 0; i < length; i++) {
+            result += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return result;
+    }
+
+    function generateAndSetNewPassword() { 
+        const password = generateRandomString(12, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*');
+        
+        passwordInput.value = password;
+
+        displayDiv.innerHTML = `
+            <div class="credential-item">
+                <strong>Nova Senha:</strong> <span>${password}</span>
+            </div>
+        `;
+        displayDiv.style.display = 'block';
+    }
+
+    generateBtn.addEventListener('click', generateAndSetNewPassword);
+});
+</script>
+{% endblock %}

@@ -1,0 +1,222 @@
+/* static/css/manage_users.css (Estilo Final: Compacto e Limpo com botão ajustado) */
+
+/* Painel do formulário (Compacto e alinhado à esquerda) */
+.form-panel {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 25px 30px;
+    margin-bottom: 30px;
+    max-width: 600px; /* Largura máxima compacta */
+    margin-left: 0;
+    margin-right: 0;
+}
+
+/* Painel da tabela (Ocupa a largura total disponível) */
+.table-panel {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 25px 30px;
+    margin-bottom: 30px;
+}
+
+/* Títulos dos painéis */
+.form-panel h2, .table-panel h2 {
+    font-size: 1.3em;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-top: 0;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* --- Estilos do Formulário --- */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 0.9em;
+    color: var(--text-secondary);
+}
+
+/* INPUTS DE TEXTO E SELECT */
+.form-panel input[type="text"],
+.form-panel input[type="password"], /* NOVO: Estilo para input de senha */
+.form-panel select {
+    width: 100%;
+    padding: 12px;
+    font-size: 1em;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+    transition: all 0.2s ease-in-out;
+}
+
+.form-panel select {
+    cursor: pointer;
+}
+
+/* Botão de gerar com cor de destaque */
+.form-panel .generate-btn {
+    width: 100%; /* Ajustado para ocupar a largura total do grupo */
+    padding: 12px;
+    font-size: 1em;
+    font-weight: 600;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background-color: var(--border-color); /* Cor mais neutra */
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.form-panel .generate-btn:hover {
+    background-color: #444c56; /* Tom mais escuro ao hover */
+    color: var(--text-primary);
+}
+
+/* Efeito de foco para campos */
+.form-panel input:focus,
+.form-panel select:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.2);
+}
+
+/* Nova regra EXCLUSIVA para o botão "Criar Usuário" */
+.form-panel .submit-btn {
+    display: block; /* Permite centralização */
+    width: auto; /* Tamanho se ajusta ao conteúdo */
+    min-width: 250px; /* Largura mínima */
+    margin-left: auto; /* Centraliza */
+    margin-right: auto; /* Centraliza */
+    margin-top: 25px; /* Espaçamento superior */
+    padding: 12px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 6px;
+    background-color: var(--accent-blue);
+    color: var(--bg-dark);
+    border: 1px solid var(--accent-blue);
+    transition: all 0.2s ease-in-out;
+}
+
+.form-panel .submit-btn:hover {
+    background-color: #82c8ff;
+}
+
+/* Caixa de credenciais geradas (agora apenas para senha) */
+.credentials-display {
+    background-color: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    padding: 15px;
+    margin-top: -20px; /* Sobrepõe um pouco a borda do form-group */
+    margin-bottom: 20px;
+    border-radius: 0 0 6px 6px;
+    border-top: none;
+}
+.credential-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.credential-item:last-child { margin-bottom: 0; }
+.credential-item strong { color: var(--text-secondary); }
+.credential-item span { font-family: 'IBM Plex Mono', monospace; color: var(--text-primary); } /* Fonte para a senha */
+
+/* --- Estilos da Tabela --- */
+.users-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.users-table th, .users-table td {
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+.users-table tr:last-child td {
+    border-bottom: none;
+}
+
+.users-table th {
+    color: var(--text-secondary);
+    font-size: 0.85em;
+    text-transform: uppercase;
+}
+
+.users-table tbody tr:hover {
+    background-color: var(--bg-dark);
+}
+
+.status-vitalicio {
+    color: var(--accent-green);
+    font-weight: 600;
+}
+
+/* Container para múltiplos botões de ação na tabela */
+.user-actions {
+    display: flex;
+    gap: 10px; /* Espaço entre os botões */
+    flex-wrap: wrap; /* Permite que os botões quebrem a linha em telas pequenas */
+}
+
+/* Estilo para o novo botão "Redefinir Senha" */
+.reset-password-button {
+    background-color: var(--accent-blue);
+    color: var(--bg-dark);
+    font-size: 0.9em;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 6px;
+    text-decoration: none; /* Remove sublinhado */
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-block; /* Para padding e alinhamento */
+}
+
+.reset-password-button:hover {
+    background-color: #82c8ff;
+}
+
+.delete-button-danger {
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--accent-red);
+    font-size: 0.9em;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.delete-button-danger:hover {
+    background-color: var(--accent-red);
+    color: white;
+    border-color: var(--accent-red);
+}
+
+/* Responsividade para o painel de formulário em telas pequenas */
+@media (max-width: 600px) {
+    .form-panel {
+        padding: 20px;
+    }
+    .form-panel .submit-btn {
+        min-width: unset; /* Remove largura mínima em telas muito pequenas */
+        width: 100%; /* Ocupa a largura total */
+    }
+    .user-actions {
+        flex-direction: column; /* Empilha os botões em telas muito pequenas */
+        gap: 5px;
+    }
+    .user-actions .reset-password-button,
+    .user-actions .delete-button-danger {
+        width: 100%; /* Botões ocupam a largura total */
+        text-align: center;
+    }
+}

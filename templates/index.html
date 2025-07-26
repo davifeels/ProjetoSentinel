@@ -1,0 +1,126 @@
+{% extends "layout.html" %}
+
+{% block title %}Análise | SentinelVision{% endblock %}
+
+{% block head_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/search.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <h1>Dashboard de Análise</h1>
+    <p class="subtitle">Envie uma imagem para verificação biométrica ou busque por dados textuais no sistema.</p>
+
+    <div id="face-search-panel" class="search-panel">
+        <form id="search-form" method="POST" action="{{ url_for('search') }}" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="image">Arquivo de Imagem para Análise</label>
+                
+                <input id="image" type="file" name="image" accept="image/*" required style="display: none;"> 
+                
+                <label for="image" class="custom-file-upload">
+                    <span class="custom-file-upload-text">
+                        Clique aqui para selecionar ou arraste o arquivo
+                    </span>
+                </label>
+                
+                <div id="file-chosen" class="file-chosen-text">Nenhum arquivo selecionado</div>
+            </div>
+            <button type="submit">Analisar Rosto</button>
+        </form>
+    </div>
+
+    <div id="text-search-panel" class="search-panel" style="display: none;">
+        <form method="GET" action="{{ url_for('gallery') }}">
+            <div class="form-group">
+                <label for="text-query">Buscar por Nome, Documento, Endereço ou Status</label>
+                <input id="text-query" type="text" name="query" placeholder="Digite o termo da busca...">
+            </div>
+            <button type="submit">Buscar Dados</button>
+        </form>
+    </div>
+
+    <div class="search-toggle">
+        <a href="#" id="toggle-link">Ou buscar por texto</a>
+    </div>
+
+    <div id="result-container" class="result-container">
+        <div id="loading-spinner" class="loading-spinner" style="display: none;"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Lógica para a busca por rosto (via AJAX)
+document.getElementById('search-form').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const form = event.target;
+    const formData = new FormData(form);
+    const resultContainer = document.getElementById('result-container');
+    const loadingSpinner = document.getElementById('loading-spinner');
+    
+    resultContainer.innerHTML = '';
+    loadingSpinner.style.display = 'block';
+
+    fetch(form.action, { method: 'POST', body: formData })
+    .then(response => response.json())
+    .then(data => {
+        loadingSpinner.style.display = 'none';
+        let html = '';
+        if (data.error) {
+            html = `<div class="alert alert-error">${data.error}</div>`;
+        } else if (data.status === 'success') {
+            // MUDANÇA AQUI: Removido o h2 "Correspondência Positiva" e o link direto para Analisar Rosto
+            html = `
+                <div class="result-card">
+                    <a href="${data.person.detail_url}"> <img src="${data.person.image_url}" alt="Foto de ${data.person.name}">
+                    </a>
+                    <p class="result-name">${data.person.name}</p>
+                </div>
+            `;
+        } else {
+            html = `<div class="alert alert-info">${data.status}</div>`;
+        }
+        resultContainer.innerHTML = html;
+    })
+    .catch(error => {
+        loadingSpinner.style.display = 'none';
+        resultContainer.innerHTML = `<div class="alert alert-error">Erro de conexão. Tente novamente.</div>`;
+    });
+});
+
+// Lógica para alternar entre os painéis de busca
+const toggleLink = document.getElementById('toggle-link');
+const faceSearchPanel = document.getElementById('face-search-panel');
+const textSearchPanel = document.getElementById('text-search-panel');
+
+toggleLink.addEventListener('click', function(event) {
+    event.preventDefault();
+    
+    if (faceSearchPanel.style.display !== 'none') {
+        faceSearchPanel.style.display = 'none';
+        textSearchPanel.style.display = 'block';
+        toggleLink.textContent = 'Ou buscar por reconhecimento facial';
+    } else {
+        faceSearchPanel.style.display = 'block';
+        textSearchPanel.style.display = 'none';
+        toggleLink.textContent = 'Ou buscar por texto';
+    }
+});
+
+// Script para atualizar o texto do arquivo selecionado
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('image');
+    const fileChosenText = document.getElementById('file-chosen'); 
+
+    fileInput.addEventListener('change', function() {
+        if (this.files.length > 0) {
+            fileChosenText.textContent = this.files[0].name;
+        } else {
+            fileChosenText.textContent = 'Nenhum arquivo selecionado';
+        }
+    });
+});
+</script>
+{% endblock %}
