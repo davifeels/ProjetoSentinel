@@ -1,9 +1,10 @@
-# app.py (Versão Final com Controle de Acesso por Perfil e CORREÇÃO da ordem do db.SQLAlchemy)
+# app.py (Versão Final com Lógica de Análise de Galeria Aprimorada e correção de erros)
 
 import os
 import uuid
 import numpy as np
 import faiss
+import cv2
 from flask import Flask, request, render_template, url_for, redirect, flash, jsonify, abort
 from werkzeug.utils import secure_filename
 import face_recognition
@@ -11,7 +12,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import or_
-from sqlalchemy.exc import IntegrityError # Importar para tratar erros de unicidade
+from sqlalchemy.exc import IntegrityError
 from datetime import date, datetime, timedelta
 import logging 
 
@@ -32,10 +33,8 @@ os.makedirs(DB_IMAGES_FOLDER, exist_ok=True)
 os.makedirs(SIGHTING_IMAGES_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# <--- db = SQLAlchemy(app) DEVE SER DEFINIDO ANTES DOS MODELOS
 db = SQLAlchemy(app) 
 
-# Configuração de Logging para depuração
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -65,7 +64,6 @@ class Person(db.Model):
     name = db.Column(db.String(100), nullable=False)
     status = db.Column(db.String(50), nullable=True, default='Em Observação')
     doc_number = db.Column(db.String(50), nullable=True, unique=True)
-    face_encoding = db.Column(db.LargeBinary, nullable=False)
     registration_date = db.Column(db.DateTime, default=db.func.now())
     notes = db.Column(db.Text, nullable=True)
     date_of_birth = db.Column(db.Date, nullable=True)
@@ -80,18 +78,15 @@ class Person(db.Model):
     photos = db.relationship('Photo', backref='person', lazy=True, cascade="all, delete-orphan")
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
-
 class Photo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String(100), nullable=False, unique=True)
     photo_type = db.Column(db.String(50), nullable=False, default='sighting')
     upload_date = db.Column(db.DateTime, default=db.func.now())
     person_id = db.Column(db.Integer, db.ForeignKey('person.id'), nullable=False)
+    face_encoding = db.Column(db.LargeBinary, nullable=False)
 
-# --- FIM DOS MODELOS DO BANCO DE DADOS ---
-
-
-# --- FUNÇÕES AUXILIARES FAISS E OUTRAS (DEFINIDAS APÓS OS MODELOS) ---
+# --- FUNÇÕES AUXILIARES FAISS E OUTRAS ---
 def save_faiss_index():
     global faiss_index
     try:
@@ -104,10 +99,10 @@ def build_faiss_from_db():
     global faiss_index
     faiss_index = faiss.IndexIDMap(faiss.IndexFlatL2(FAISS_DIMENSION))
     with app.app_context():
-        people = Person.query.all() 
-        if people:
-            encodings = np.array([np.frombuffer(p.face_encoding, dtype=np.float64) for p in people]).astype('float32')
-            ids = np.array([p.id for p in people])
+        photos = Photo.query.all()
+        if photos:
+            encodings = np.array([np.frombuffer(p.face_encoding, dtype=np.float64) for p in photos]).astype('float32')
+            ids = np.array([p.id for p in photos])
             faiss_index.add_with_ids(encodings, ids)
             logger.info(f"FAISS: Índice construído do DB com {faiss_index.ntotal} entradas.") 
         else:
@@ -120,7 +115,7 @@ def load_or_build_faiss_index():
         try:
             faiss_index = faiss.read_index(FAISS_INDEX_PATH)
             with app.app_context():
-                db_count = Person.query.count() 
+                db_count = Photo.query.count() 
                 logger.info(f"FAISS: Índice carregado do disco com {faiss_index.ntotal} entradas. DB tem {db_count} entradas.") 
                 if faiss_index.ntotal != db_count:
                     logger.warning("FAISS: Contagem de entradas no índice não corresponde ao DB. Reconstruindo...") 
@@ -135,27 +130,16 @@ def load_or_build_faiss_index():
         logger.info("FAISS: Arquivo de índice não encontrado. Construindo do DB...") 
         build_faiss_from_db()
 
-# --- FIM DAS FUNÇÕES AUXILIARES FAISS E OUTRAS ---
-
-
-# --- INICIALIZAÇÃO DO FAISS AQUI (AGORA APÓS OS MODELOS E FUNÇÕES FAISS) ---
-with app.app_context():
-    load_or_build_faiss_index()
-
-
-# --- CONFIGURAÇÃO DO SISTEMA DE LOGIN (AGORA APÓS A INICIALIZAÇÃO DO FAISS) ---
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 login_manager.login_message = "Por favor, faça login para acessar esta página."
 login_manager.login_message_category = "info"
 
-# --- FUNÇÃO user_loader do Flask-Login (DEVE SER DEFINIDA APÓS login_manager) ---
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# --- ROTAS DE AUTENTICAÇÃO ---
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -180,7 +164,6 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
-# --- ROTAS DA APLICAÇÃO ---
 @app.route('/')
 @login_required
 def index():
@@ -211,10 +194,11 @@ def dashboard():
     
     return render_template('dashboard.html', total_profiles=total_profiles, status_chart_data=status_chart_data, recent_profiles=recent_profiles)
 
+
 @app.route('/search', methods=['POST'])
 @login_required
 def search():
-    logger.info("Iniciando busca facial.") 
+    logger.info("Iniciando busca facial com análise profunda.") 
     if 'image' not in request.files: 
         logger.warning("Nenhum arquivo de imagem selecionado na requisição.")
         return jsonify({'error': 'Nenhum arquivo de imagem selecionado.'}), 400
@@ -224,17 +208,19 @@ def search():
         logger.warning("Nome de arquivo inválido.")
         return jsonify({'error': 'Nome de arquivo inválido.'}), 400
     
-    temp_path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(file.filename))
-    file.stream.seek(0)
+    # Salva o arquivo temporariamente para processar
+    temp_filename = secure_filename(f"temp_search_{uuid.uuid4().hex[:8]}.jpg")
+    temp_path = os.path.join(app.config['UPLOAD_FOLDER'], temp_filename)
     file.save(temp_path)
-    logger.info(f"Arquivo temporário salvo em: {temp_path}")
-    
+    logger.info(f"Arquivo temporário de busca salvo em: {temp_path}")
+
     try:
         search_image = face_recognition.load_image_file(temp_path)
         search_encodings = face_recognition.face_encodings(search_image)
         logger.info(f"Rostos detectados na imagem de busca: {len(search_encodings)}")
     except Exception as e:
-        os.remove(temp_path)
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
         logger.error(f"Erro ao processar a imagem de busca: {e}")
         return jsonify({'error': f'Não foi possível processar a imagem: {e}'}), 500
     
@@ -255,34 +241,61 @@ def search():
         logger.info("Índice FAISS vazio. Nenhum perfil cadastrado para comparação.")
         return jsonify({'status': 'Nenhum perfil cadastrado para comparação.'})
     
-    distances, ids = faiss_index.search(search_encoding, 1)
-    logger.info(f"Distância FAISS encontrada: {distances[0][0]}, ID: {ids[0][0]}")
+    distances, photo_ids = faiss_index.search(search_encoding, k=5)
     
-    if ids[0][0] != -1 and distances[0][0] <= FAISS_SIMILARITY_THRESHOLD:
-        person_id = int(ids[0][0])
-        matched_person = Person.query.get(person_id)
+    found_people = {}
+    best_match_id = -1
+    best_avg_distance = FAISS_SIMILARITY_THRESHOLD
+    
+    for i, dist in zip(photo_ids[0], distances[0]):
+        if i != -1:
+            photo = Photo.query.get(int(i))
+            if photo and photo.person:
+                person_id = photo.person_id
+                if person_id not in found_people:
+                    found_people[person_id] = {'person': photo.person, 'distances': []}
+                found_people[person_id]['distances'].append(dist)
+    
+    for person_id, data in found_people.items():
+        avg_distance = np.mean(data['distances'])
+        if avg_distance < best_avg_distance:
+            best_avg_distance = avg_distance
+            best_match_id = person_id
+
+    if best_match_id != -1:
+        matched_person = Person.query.get(best_match_id)
         
         if matched_person:
-            logger.info(f"Correspondência encontrada para {matched_person.name} (ID: {person_id}).")
+            logger.info(f"Correspondência encontrada para {matched_person.name} (ID: {best_match_id}).")
             if matched_person.user_id != current_user.id and current_user.role != 'ADMIN':
                 os.remove(temp_path)
-                logger.warning(f"Acesso negado: Usuário {current_user.username} tentou acessar perfil {matched_person.name} (ID: {person_id}) de outro usuário.")
+                logger.warning(f"Acesso negado: Usuário {current_user.username} tentou acessar perfil {matched_person.name} (ID: {best_match_id}) de outro usuário.")
                 return jsonify({'status': 'Nenhuma correspondência encontrada.'})
 
-            sighting_filename = f"sighting_{person_id}_{uuid.uuid4().hex[:8]}.jpg"
+            sighting_filename = f"sighting_{best_match_id}_{uuid.uuid4().hex[:8]}.jpg"
             sighting_path = os.path.join(SIGHTING_IMAGES_FOLDER, sighting_filename)
+            
             os.rename(temp_path, sighting_path)
-            new_sighting = Photo(filename=sighting_filename, photo_type='sighting', person_id=person_id)
+            
+            new_sighting = Photo(filename=sighting_filename, photo_type='sighting', person_id=best_match_id, face_encoding=search_encoding.tobytes())
+            
             profile_photo = Photo.query.filter_by(person_id=matched_person.id, photo_type='profile').first()
             profile_photo_url = url_for('static', filename=f'db_images/{profile_photo.filename}') if profile_photo else ''
+            
             db.session.add(new_sighting)
             db.session.commit()
+            
+            faiss_index.add_with_ids(search_encoding, np.array([new_sighting.id]))
+            save_faiss_index()
+
             logger.info(f"Avistamento registrado para {matched_person.name}.")
             return jsonify({ 'status': 'success', 'person': { 'id': matched_person.id, 'name': matched_person.name, 'image_url': profile_photo_url, 'detail_url': url_for('person_detail', person_id=matched_person.id) } })
     
-    os.remove(temp_path)
+    if os.path.exists(temp_path):
+        os.remove(temp_path)
     logger.info("Nenhuma correspondência encontrada com a similaridade necessária.")
     return jsonify({'status': 'Nenhuma correspondência encontrada.'})
+
 
 @app.route('/register', methods=['GET', 'POST'])
 @login_required
@@ -315,15 +328,15 @@ def register():
         if doc_number == '':
             doc_number = None
 
-        new_person = Person(name=name, face_encoding=encoding_bytes, status=request.form.get('status', 'Em Observação'), doc_number=doc_number, date_of_birth=date_of_birth_obj, gender=request.form.get('gender'), address=request.form.get('address'), phones=request.form.get('phones'), emails=request.form.get('emails'), father_name=request.form.get('father_name'), mother_name=request.form.get('mother_name'), spouse=request.form.get('spouse'), children=request.form.get('children'), notes=request.form.get('notes'), user_id=current_user.id)
+        new_person = Person(name=name, status=request.form.get('status', 'Em Observação'), doc_number=doc_number, date_of_birth=date_of_birth_obj, gender=request.form.get('gender'), address=request.form.get('address'), phones=request.form.get('phones'), emails=request.form.get('emails'), father_name=request.form.get('father_name'), mother_name=request.form.get('mother_name'), spouse=request.form.get('spouse'), children=request.form.get('children'), notes=request.form.get('notes'), user_id=current_user.id)
         try:
             db.session.add(new_person)
             db.session.flush()
-            profile_photo = Photo(filename=profile_filename, photo_type='profile', person_id=new_person.id)
+            profile_photo = Photo(filename=profile_filename, photo_type='profile', person_id=new_person.id, face_encoding=encoding_bytes)
             db.session.add(profile_photo)
             db.session.commit()
             new_encoding = np.array(encodings[0]).astype('float32').reshape(1, -1)
-            faiss_index.add_with_ids(new_encoding, np.array([new_person.id]))
+            faiss_index.add_with_ids(new_encoding, np.array([profile_photo.id]))
             save_faiss_index() 
             flash(f'Perfil de {name} cadastrado com sucesso!', 'success')
             return redirect(url_for('gallery'))
@@ -350,6 +363,69 @@ def gallery(page=1):
     people = base_query.order_by(Person.registration_date.desc()).paginate(page=page, per_page=12)
     return render_template('gallery.html', people=people, search_query=search_query)
 
+@app.route('/add_photo_to_person/<int:person_id>', methods=['POST'])
+@login_required
+def add_photo_to_person(person_id):
+    person = Person.query.get_or_404(person_id)
+
+    if person.user_id != current_user.id and current_user.role != 'ADMIN':
+        abort(403)
+
+    if 'new_photo' not in request.files:
+        flash('Nenhum arquivo de imagem enviado.', 'error')
+        return redirect(url_for('person_detail', person_id=person_id))
+
+    file = request.files['new_photo']
+    if file.filename == '':
+        flash('Nenhum arquivo selecionado.', 'error')
+        return redirect(url_for('person_detail', person_id=person_id))
+
+    if file:
+        temp_filename = secure_filename(f"temp_{uuid.uuid4().hex[:8]}.jpg")
+        temp_path = os.path.join(app.config['UPLOAD_FOLDER'], temp_filename)
+        file.save(temp_path)
+
+        try:
+            image = face_recognition.load_image_file(temp_path)
+            encodings = face_recognition.face_encodings(image)
+            
+            if len(encodings) == 0:
+                os.remove(temp_path)
+                flash('Nenhum rosto encontrado na imagem.', 'warning')
+            elif len(encodings) > 1:
+                os.remove(temp_path)
+                flash('Múltiplos rostos detectados. Por favor, envie uma imagem com apenas um rosto.', 'warning')
+            else:
+                encoding_bytes = encodings[0].tobytes()
+                sighting_filename = f"sighting_{person_id}_{uuid.uuid4().hex[:8]}.jpg"
+                sighting_path = os.path.join(SIGHTING_IMAGES_FOLDER, sighting_filename)
+                
+                os.rename(temp_path, sighting_path)
+
+                new_photo = Photo(
+                    filename=sighting_filename,
+                    photo_type='sighting',
+                    person_id=person_id,
+                    face_encoding=encoding_bytes
+                )
+                db.session.add(new_photo)
+                db.session.commit()
+                
+                new_encoding = np.array(encodings[0]).astype('float32').reshape(1, -1)
+                faiss_index.add_with_ids(new_encoding, np.array([new_photo.id]))
+                save_faiss_index()
+
+                flash('Nova foto adicionada com sucesso!', 'success')
+
+        except Exception as e:
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
+            db.session.rollback()
+            flash(f'Ocorreu um erro ao processar a imagem: {e}', 'error')
+
+    return redirect(url_for('person_detail', person_id=person_id))
+
+
 @app.route('/person/<int:person_id>')
 @login_required
 def person_detail(person_id):
@@ -359,21 +435,24 @@ def person_detail(person_id):
         abort(403)
 
     similar_people = []
-    if faiss_index.ntotal > 1: 
-        person_encoding = np.frombuffer(person.face_encoding, dtype=np.float64).astype('float32').reshape(1, -1)
+    profile_photo = Photo.query.filter_by(person_id=person.id, photo_type='profile').first()
+    if faiss_index.ntotal > 1 and profile_photo: 
+        person_encoding = np.frombuffer(profile_photo.face_encoding, dtype=np.float64).astype('float32').reshape(1, -1)
         distances, ids = faiss_index.search(person_encoding, k=10)
-        possible_ids = []
-        for i, dist in enumerate(distances[0]):
-            match_id = ids[0][i]
-            if match_id != person.id and match_id != -1 and dist <= FAISS_SIMILARITY_FOR_SUGGESTIONS:
-                possible_ids.append(int(match_id))
         
-        if possible_ids:
+        possible_person_ids = set()
+        for i, dist in enumerate(distances[0]):
+            photo_id = ids[0][i]
+            if photo_id != -1:
+                photo = Photo.query.get(int(photo_id))
+                if photo and photo.person_id != person.id and dist <= FAISS_SIMILARITY_FOR_SUGGESTIONS:
+                    possible_person_ids.add(photo.person_id)
+        
+        if possible_person_ids:
             if current_user.role == 'ADMIN':
-                similar_people = Person.query.filter(Person.id.in_(possible_ids)).all()
+                similar_people = Person.query.filter(Person.id.in_(possible_person_ids)).all()
             else:
-                similar_people = Person.query.filter(Person.id.in_(possible_ids), Person.user_id == current_user.id).all() 
-
+                similar_people = Person.query.filter(Person.id.in_(possible_person_ids), Person.user_id == current_user.id).all() 
 
     return render_template('person_detail.html', person=person, similar_people=similar_people)
 
@@ -423,19 +502,23 @@ def delete(person_id):
     if person_to_delete.user_id != current_user.id and current_user.role != 'ADMIN':
         abort(403)
 
-    if faiss_index.ntotal > 0:
+    photos_to_delete = person_to_delete.photos
+    photo_ids = np.array([p.id for p in photos_to_delete])
+
+    if faiss_index.ntotal > 0 and len(photo_ids) > 0:
         try:
-            faiss_index.remove_ids(np.array([person_to_delete.id]))
+            faiss_index.remove_ids(photo_ids)
             save_faiss_index()
         except Exception as e:
-            logger.warning(f"Alerta: ID {person_to_delete.id} não encontrado no índice FAISS. Reconstruindo... Erro: {e}") 
+            logger.warning(f"Alerta: IDs {photo_ids} não encontrados no índice FAISS. Reconstruindo... Erro: {e}") 
             build_faiss_from_db()
 
-    for photo in person_to_delete.photos:
+    for photo in photos_to_delete:
         folder = SIGHTING_IMAGES_FOLDER if photo.photo_type == 'sighting' else DB_IMAGES_FOLDER
         image_path = os.path.join(folder, photo.filename)
         if os.path.exists(image_path):
             os.remove(image_path)
+    
     db.session.delete(person_to_delete)
     db.session.commit()
     flash(f'{person_to_delete.name} foi deletado com sucesso.', 'success')
@@ -481,23 +564,20 @@ def manage_users():
     users = User.query.order_by(User.id).all()
     return render_template('manage_users.html', users=users)
 
-# NOVO: Rota para redefinir senha de usuário
 @app.route('/manage_users/<int:user_id>/reset_password', methods=['GET', 'POST'])
 @login_required
 def reset_user_password(user_id):
-    # Acesso apenas para o perfil ADMIN
     if current_user.role != 'ADMIN':
         abort(403)
 
     user_to_reset = User.query.get_or_404(user_id)
 
-    # Protege a conta de administrador principal de ter a senha redefinida por esta tela
     if user_to_reset.id == 1:
         flash('A senha da conta de administrador principal não pode ser redefinida por aqui.', 'warning')
         return redirect(url_for('manage_users'))
 
     if request.method == 'POST':
-        new_username = request.form.get('username') # Pega o novo nome de usuário
+        new_username = request.form.get('username')
         new_password = request.form.get('new_password')
 
         if not new_username:
@@ -509,17 +589,16 @@ def reset_user_password(user_id):
             return redirect(url_for('reset_user_password', user_id=user_id))
         
         try:
-            # Verifica se o novo nome de usuário já existe e não é o próprio usuário
             if new_username != user_to_reset.username and User.query.filter_by(username=new_username).first():
                 flash(f'O nome de usuário "{new_username}" já está em uso.', 'error')
                 return redirect(url_for('reset_user_password', user_id=user_id))
 
-            user_to_reset.username = new_username # Atualiza o nome de usuário
+            user_to_reset.username = new_username
             user_to_reset.set_password(new_password)
             db.session.commit()
             flash(f'Credenciais do usuário "{user_to_reset.username}" atualizadas com sucesso!', 'success')
             return redirect(url_for('manage_users'))
-        except IntegrityError: # Captura erro de unicidade do DB (se o DB forçar)
+        except IntegrityError:
             db.session.rollback()
             flash(f'Erro: O nome de usuário "{new_username}" já está em uso.', 'error')
             return redirect(url_for('reset_user_password', user_id=user_id))
@@ -530,31 +609,27 @@ def reset_user_password(user_id):
 
     return render_template('reset_password.html', user=user_to_reset)
 
-# NOVO: Rota para a página "Minha Conta"
 @app.route('/my_account', methods=['GET', 'POST'])
 @login_required
 def my_account():
-    user_to_update = current_user # O usuário logado
+    user_to_update = current_user
 
     if request.method == 'POST':
         current_password = request.form.get('current_password')
         new_username = request.form.get('username')
         new_password = request.form.get('new_password')
 
-        # 1. Verificar senha atual
         if not current_password or not user_to_update.check_password(current_password):
             flash('Senha atual incorreta.', 'error')
             return redirect(url_for('my_account'))
         
-        # 2. Validar e atualizar nome de usuário (se alterado)
         if new_username and new_username != user_to_update.username:
             if User.query.filter_by(username=new_username).first():
                 flash(f'O nome de usuário "{new_username}" já está em uso.', 'error')
                 return redirect(url_for('my_account'))
             user_to_update.username = new_username
             
-        # 3. Validar e atualizar nova senha (se fornecida)
-        if new_password: # Só atualiza se uma nova senha for fornecida
+        if new_password:
             if len(new_password) < 6:
                 flash('A nova senha deve ter no mínimo 6 caracteres.', 'error')
                 return redirect(url_for('my_account'))
@@ -590,12 +665,12 @@ def delete_user(user_id):
     return redirect(url_for('manage_users'))
 
 
-# --- INICIALIZAÇÃO E COMANDOS CLI ---
 @app.cli.command("init-db")
 def init_db_command():
     with app.app_context():
         try: 
             db.create_all()
+            load_or_build_faiss_index()
             logger.info("Banco de dados inicializado com sucesso.") 
         except Exception as e:
             logger.error(f"Erro ao inicializar o banco de dados: {e}") 
@@ -610,10 +685,4 @@ def create_admin():
         admin.set_password('admin')
         db.session.add(admin)
         db.session.commit()
-        logger.info("Usuário 'admin' criado com sucesso. Senha padrão: admin") 
-
-# A chamada para app.run(debug=True) geralmente é feita apenas para execução direta do script,
-# ou em um ambiente de produção com Gunicorn. Com 'flask run', o Flask já gerencia isso.
-# Para evitar duplicação ou comportamento inesperado com 'flask run',
-# é comum remover o bloco if __name__ == '__main__': em arquivos usados com o CLI do Flask.
-# Mantenha-o apenas se você planeja rodar o arquivo como 'python app.py'.
+        logger.info("Usuário 'admin' criado com sucesso. Senha padrão: admin")

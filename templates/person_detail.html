@@ -58,17 +58,35 @@
         </div>
 
         <div class="gallery-panel">
-            <h3>Histórico de Avistamentos</h3>
+            <h3 class="sighting-title">Adicionar Nova Imagem</h3>
+            <div class="add-photo-container">
+                <form id="add-photo-form" method="POST" action="{{ url_for('add_photo_to_person', person_id=person.id) }}" enctype="multipart/form-data">
+                    <input type="file" id="new_photo" name="new_photo" accept="image/*" required style="display: none;">
+                    
+                    <label for="new_photo" class="custom-file-upload">
+                        <span class="upload-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                        </span>
+                        <span id="add-photo-file-chosen-text" class="custom-file-upload-text">
+                            Clique aqui ou arraste a imagem
+                        </span>
+                    </label>
+                    
+                    <button type="submit" class="add-photo-btn">Adicionar Foto</button>
+                </form>
+            </div>
+            
+            <h3 class="sighting-title">Histórico de Fotos</h3>
             <div class="sighting-gallery">
-                {% for photo in person.photos if photo.photo_type == 'sighting' %}
+                {% for photo in person.photos %}
                     <div class="sighting-card">
-                        <a href="{{ url_for('static', filename='sighting_images/' + photo.filename) }}" target="_blank">
-                            <img src="{{ url_for('static', filename='sighting_images/' + photo.filename) }}" alt="Avistamento de {{ person.name }}">
+                        <a href="{{ url_for('static', filename='db_images/' + photo.filename) if photo.photo_type == 'profile' else url_for('static', filename='sighting_images/' + photo.filename) }}" target="_blank">
+                            <img src="{{ url_for('static', filename='db_images/' + photo.filename) if photo.photo_type == 'profile' else url_for('static', filename='sighting_images/' + photo.filename) }}" alt="Foto de {{ person.name }}">
                         </a>
                         <small>{{ photo.upload_date.strftime('%d/%m/%Y %H:%M') }}</small>
                     </div>
                 {% else %}
-                    <p>Nenhum avistamento registrado.</p>
+                    <p>Nenhuma foto registrada.</p>
                 {% endfor %}
             </div>
 
@@ -92,4 +110,59 @@
             </div>
         </div>
     </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('new_photo');
+    const fileChosenText = document.getElementById('add-photo-file-chosen-text'); 
+    const dropArea = document.querySelector('.custom-file-upload');
+
+    // Função para atualizar o nome do arquivo no texto
+    function updateFileText(file) {
+        if (file) {
+            fileChosenText.textContent = file.name;
+        } else {
+            fileChosenText.textContent = 'Clique aqui ou arraste a imagem';
+        }
+    }
+
+    // Evento de mudança para quando o usuário seleciona um arquivo
+    fileInput.addEventListener('change', function() {
+        updateFileText(this.files[0]);
+    });
+
+    // Eventos de drag-and-drop
+    dropArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropArea.classList.add('drag-over');
+        fileChosenText.textContent = 'Solte a imagem aqui';
+    });
+
+    dropArea.addEventListener('dragleave', () => {
+        dropArea.classList.remove('drag-over');
+        updateFileText(fileInput.files[0]);
+    });
+
+    dropArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropArea.classList.remove('drag-over');
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            fileInput.files = files;
+            updateFileText(files[0]);
+        }
+    });
+
+    // Validação do formulário para garantir que um arquivo foi selecionado
+    const addPhotoForm = document.getElementById('add-photo-form');
+    addPhotoForm.addEventListener('submit', function(e) {
+        if (fileInput.files.length === 0) {
+            e.preventDefault();
+            alert('Por favor, selecione uma imagem para adicionar.');
+        }
+    });
+});
+</script>
 {% endblock %}

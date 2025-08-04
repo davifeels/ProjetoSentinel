@@ -1,4 +1,4 @@
-/* static/css/detail_gallery.css */
+/* static/css/detail_gallery.css (Versão Final e Corrigida) */
 
 .detail-header {
     display: flex;
@@ -8,8 +8,23 @@
     padding-bottom: 20px;
     border-bottom: 1px solid var(--border-color);
 }
-.back-link { text-decoration: none; color: var(--text-secondary); font-weight: 600; }
-.back-link:hover { color: var(--text-primary); }
+.back-link { 
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    background-color: var(--card-bg);
+    padding: 10px 20px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+.back-link:hover {
+    background-color: var(--border-color);
+    color: var(--text-primary);
+}
 
 .dossier-grid {
     display: grid;
@@ -77,11 +92,79 @@
     font-size: 0.9em;
     min-height: 80px;
 }
+.status-em-observação { color: #d4a731; }
+.status-ativo { color: var(--accent-green); }
+.status-procurado { color: var(--accent-red); }
+.status-inativo { color: #8b949e; }
 
 /* Painel da Direita: Galerias */
 .gallery-panel h3 { font-size: 1.5em; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
+.gallery-panel h3.sighting-title { margin-top: 40px; }
 .gallery-panel h3.similar-title { margin-top: 40px; }
 
+/* --- Estilo para o novo formulário de upload aprimorado --- */
+.add-photo-container {
+    margin-bottom: 30px;
+}
+.add-photo-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+}
+.custom-file-upload {
+    border: 2px dashed var(--border-color);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 30px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+.custom-file-upload.drag-over {
+    border-color: var(--accent-blue);
+    background-color: rgba(88, 166, 255, 0.1);
+    transform: scale(1.02);
+}
+.custom-file-upload:hover {
+    border-color: var(--accent-blue);
+}
+.upload-icon {
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+    transition: color 0.2s ease;
+}
+.custom-file-upload:hover .upload-icon {
+    color: var(--accent-blue);
+}
+.custom-file-upload-text {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 0.9em;
+}
+.add-photo-btn {
+    width: 100%;
+    background-color: var(--accent-blue);
+    color: var(--bg-dark);
+    font-size: 1em;
+    font-weight: 600;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+.add-photo-btn:hover {
+    background-color: #82c8ff;
+}
+
+/* Estilo para a galeria de avistamentos */
 .sighting-gallery {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
@@ -92,6 +175,7 @@
 .sighting-card img:hover { transform: scale(1.05); }
 .sighting-card small { font-size: 0.8em; color: var(--text-secondary); }
 
+/* Estilo para a galeria de rostos semelhantes */
 .similar-faces-gallery {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -100,10 +184,22 @@
 .profile-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; text-align: center; }
 .profile-card-link { text-decoration: none; }
 .profile-card img { width: 100%; height: 150px; object-fit: cover; }
-.profile-card h4 { font-size: 1em; color: var(--text-primary); padding: 10px; }
+.card-content { padding: 10px; }
+.profile-card h4 { font-size: 1em; color: var(--text-primary); padding: 0; margin: 0; }
 
-
+/* Media Queries */
 @media (max-width: 1024px) {
     .dossier-grid { grid-template-columns: 1fr; }
     .dossier-info-panel { position: static; }
+    .add-photo-form {
+        grid-template-columns: 1fr;
+    }
 }
+@media (max-width: 768px) {
+    .dossier-info-panel { padding: 15px; }
+    .dossier-main-info img { width: 120px; height: 120px; }
+    .dossier-details h3 { font-size: 0.9em; }
+    .dossier-details li { font-size: 0.9em; }
+    .add-photo-form { padding: 15px; }
+}
+

@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   web:
     build: .
@@ -8,12 +6,11 @@ services:
       - "5000:5000"
     volumes:
       - .:/app
-    # A linha abaixo foi adicionada para carregar o arquivo .env
-    env_file:
-      - .env
     environment:
+      # A senha do banco de dados agora é definida aqui para garantir a conexão.
+      # Usando a senha 'admin' definida no serviço 'db'.
       - FLASK_APP=app.py
-      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@db/sentinelvision_db
+      - DATABASE_URL=postgresql://postgres:admin@db/sentinelvision_db
     depends_on:
       - db
 
@@ -25,8 +22,8 @@ services:
     environment:
       - POSTGRES_DB=sentinelvision_db
       - POSTGRES_USER=postgres
-      # A senha agora será lida do arquivo .env pelo Docker Compose
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      # A senha agora está definida de forma fixa para testes.
+      - POSTGRES_PASSWORD=admin
     ports:
       - "5432:5432"
 

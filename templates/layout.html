@@ -62,15 +62,6 @@
     </aside>
 
     <main class="main-content">
-        {% if current_user.is_authenticated %}
-            <div class="user-display">
-                <span class="username">{{ current_user.username }}</span>
-                {% if current_user.role == 'ADMIN' %}
-                    <span class="user-role">ADMIN</span>
-                {% endif %}
-            </div>
-        {% endif %}
-
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 <div class="flash-container">

@@ -20,3 +20,4 @@ psycopg2-binary
 python-dotenv
 SQLAlchemy
 Werkzeug
+opencv-python

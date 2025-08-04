@@ -1,21 +1,26 @@
-/* static/css/register.css (Versão com Design Totalmente Limpo e Responsivo Otimizado) */
+/* static/css/register.css (Versão Agressiva para Otimização de Largura e Espaçamento) */
 
 .register-form-panel {
-    max-width: 1600px; /* Mantém a largura máxima para telas deitadas */
+    max-width: 98vw; /* MUDANÇA AQUI: Ocupa 98% da largura da viewport */
     margin-left: auto;
     margin-right: auto;
-    background-color: transparent; /* MUDANÇA AQUI: Fundo transparente */
-    border: none; /* MUDANÇA AQUI: Sem borda */
-    border-radius: 0; /* Sem arredondamento */
-    padding: 0; /* MUDANÇA AQUI: Sem padding no painel principal */
-    box-shadow: none; /* MUDANÇA AQUI: Sem sombra */
+    background-color: var(--card-bg); /* MUDANÇA AQUI: Adiciona um fundo para visualizar a área */
+    border: 1px solid var(--border-color); /* MUDANÇA AQUI: Adiciona uma borda para visualizar a área */
+    border-radius: 8px; /* Mantém o arredondamento */
+    padding: 40px; /* MUDANÇA AQUI: Aumenta o padding interno para preencher mais */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Sombra para visualização */
 }
 
 .form-grid {
     display: grid;
     grid-template-columns: 1fr 1fr; /* Padrão: 2 colunas para telas maiores */
-    gap: 120px; /* MUDANÇA AQUI: Aumenta o espaçamento entre as colunas para preencher mais */
-    padding: 0 40px; /* MUDANÇA AQUI: Adiciona padding para o grid, afastando das bordas da tela */
+    gap: 180px; /* MUDANÇA AQUI: Aumenta MUITO o espaçamento entre as colunas */
+    padding: 0 80px; /* MUDANÇA AQUI: Aumenta o padding lateral para o grid */
+}
+
+/* Garante que as colunas também se expandam */
+.form-column {
+    width: 100%;
 }
 
 /* Estilos para os títulos das colunas (Dados Principais, Contatos e Parentesco) */
@@ -23,9 +28,9 @@
     font-size: 1.3em;
     font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: 25px; /* Espaço abaixo do título da seção */
+    margin-bottom: 25px;
     padding-bottom: 15px;
-    border-bottom: 1px solid var(--border-color); /* Linha abaixo do título da seção */
+    border-bottom: 1px solid var(--border-color);
 }
 
 .form-group {
@@ -145,12 +150,12 @@ form > button[type="submit"]:hover {
         background-color: transparent; /* Remove o fundo do painel */
         border: none; /* Remove a borda do painel */
         box-shadow: none; /* Remove a sombra do painel */
-        padding: 0; /* MUDANÇA AQUI: Remove todo o padding do painel principal em mobile */
+        padding: 0; /* Remove todo o padding do painel principal em mobile */
     }
     .form-grid {
         grid-template-columns: 1fr; /* Força uma única coluna */
         gap: 0; /* Remove o espaçamento entre colunas */
-        padding: 0 20px; /* MUDANÇA AQUI: Adiciona padding lateral para o grid em mobile */
+        padding: 0 20px; /* Adiciona padding lateral para o grid em mobile */
     }
     /* Estilos específicos para a segunda coluna quando ela se torna uma linha */
     .form-column:nth-child(2) {

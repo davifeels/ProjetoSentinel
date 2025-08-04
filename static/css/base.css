@@ -1,3 +1,5 @@
+/* static/css/base.css (VERSÃO OTIMIZADA PARA RESPONSIVIDADE GLOBAL E FLASH MESSAGES) */
+
 /* Importação das fontes */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600;700&family=IBM+Plex+Mono:wght@500;600&family=Source+Sans+3:wght@400;600;700&display=swap');
 
@@ -7,13 +9,13 @@
     --sidebar-bg: #10141a;
     --border-color: #30363d;
     --card-bg: #21262d;
-    --text-primary: #c9d1d9;
-    --text-secondary: #8b949e;
+    --text-primary: #c9d1d9; /* Cor principal do texto */
+    --text-secondary: #8b949e; /* Cor secundária do texto (mais clara) */
     --accent-blue: #58a6ff;
     --accent-red: #f85149;
     --accent-green: #3fb950;
-    --font-heading: 'Poppins', sans-serif;
-    --font-body: 'Inter', sans-serif;
+    --font-heading: 'Poppins', sans-serif; /* Fonte para títulos maiores */
+    --font-body: 'Inter', sans-serif; /* Fonte para o corpo do texto (mais nítida) */
 }
 
 * {
@@ -28,8 +30,8 @@ body {
     color: var(--text-primary);
     display: flex;
     min-height: 100vh;
-    flex-direction: row;
-    overflow-x: hidden;
+    flex-direction: row; /* Padrão: sidebar e conteúdo lado a lado */
+    overflow-x: hidden; /* Evita rolagem horizontal indesejada no body */
 }
 
 .sidebar {
@@ -40,11 +42,11 @@ body {
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
-    position: sticky;
+    position: sticky; /* Mantém a sidebar fixa ao rolar */
     top: 0;
-    height: 100vh;
-    overflow-y: auto;
-    z-index: 100;
+    height: 100vh; /* Ocupa a altura total da viewport */
+    overflow-y: auto; /* Permite rolagem se o conteúdo for maior que a tela */
+    z-index: 100; /* Z-index mais alto para a sidebar em desktop */
 }
 
 .sidebar-header {
@@ -92,7 +94,7 @@ body {
 }
 
 .sidebar-logout {
-    margin-top: auto;
+    margin-top: auto; /* Empurra para o final da sidebar */
     padding-top: 15px;
     border-top: 1px solid var(--border-color);
 }
@@ -116,46 +118,14 @@ body {
 }
 
 .main-content {
-    flex-grow: 1;
+    flex-grow: 1; /* Ocupa o espaço restante */
     background-color: var(--bg-content);
     padding: 40px;
     display: flex;
     flex-direction: column;
-    position: relative;
-    z-index: 1;
-    overflow-x: hidden;
-}
-
-/* --- NOVO ESTILO: INFORMAÇÕES DO USUÁRIO --- */
-.user-display {
-    position: absolute;
-    top: 25px;
-    right: 40px;
-    background-color: var(--card-bg);
-    padding: 10px 15px;
-    border-radius: 6px;
-    border: 1px solid var(--border-color);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 0.95em;
-    z-index: 10;
-}
-
-.user-display .username {
-    font-weight: 600;
-    color: var(--text-primary);
-}
-
-.user-display .user-role {
-    background-color: var(--accent-blue);
-    color: var(--bg-dark);
-    padding: 3px 8px;
-    border-radius: 4px;
-    font-size: 0.75em;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    z-index: 1; /* Z-index mais baixo para o conteúdo principal */
+    position: relative; /* Necessário para z-index funcionar corretamente */
+    overflow-x: hidden; /* Evita rolagem horizontal indesejada no main-content */
 }
 
 h1 {
@@ -174,59 +144,53 @@ p.subtitle {
     max-width: 700px;
 }
 
-.flash-container { margin-bottom: 20px; }
-
-.alert {
-    padding: 15px;
-    border-radius: 6px;
-    border: 1px solid transparent;
+/* --- ESTILOS PARA MENSAGENS FLASH (ALERTAS) --- */
+.flash-container { 
+    margin-bottom: 20px; 
+    display: flex; /* MUDANÇA AQUI: Usa flexbox para centralizar */
+    justify-content: center; /* MUDANÇA AQUI: Centraliza horizontalmente */
+    width: 100%; /* MUDANÇA AQUI: Ocupa a largura total para centralizar */
+    position: sticky; /* MUDANÇA AQUI: Mensagens sticky no topo */
+    top: 0; /* MUDANÇA AQUI: Fixa no topo */
+    z-index: 999; /* MUDANÇA AQUI: Garante que fique acima de outros elementos */
+    padding-top: 20px; /* MUDANÇA AQUI: Espaçamento superior */
+    padding-left: 20px; /* MUDANÇA AQUI: Espaçamento lateral */
+    padding-right: 20px; /* MUDANÇA AQUI: Espaçamento lateral */
+    box-sizing: border-box; /* MUDANÇA AQUI: Inclui padding na largura total */
+}
+.alert { 
+    padding: 15px; 
+    border-radius: 6px; 
+    border: 1px solid transparent; 
     font-weight: 600;
-    max-width: 500px;
-    text-align: center;
-    width: 100%;
+    max-width: 500px; /* MUDANÇA AQUI: Limita a largura da caixa de alerta */
+    text-align: center; /* Centraliza o texto dentro da caixa */
+    width: 100%; /* Ocupa a largura máxima dentro do max-width */
 }
-
-.alert-success {
-    background-color: rgba(63, 185, 80, 0.1);
-    color: #56d364;
-    border-color: #3fb950;
-}
-
-.alert-error {
-    background-color: rgba(248, 81, 73, 0.1);
-    color: #ffa198;
-    border-color: #f85149;
-}
-
-.alert-warning {
-    background-color: rgba(212, 167, 49, 0.1);
-    color: #e3b341;
-    border-color: #d4a731;
-}
-
-.alert-info {
-    background-color: rgba(88, 166, 255, 0.1);
-    color: #79c0ff;
-    border-color: #58a6ff;
-}
+.alert-success { background-color: rgba(63, 185, 80, 0.1); color: #56d364; border-color: #3fb950; }
+.alert-error { background-color: rgba(248, 81, 73, 0.1); color: #ffa198; border-color: #f85149; }
+.alert-warning { background-color: rgba(212, 167, 49, 0.1); color: #e3b341; border-color: #d4a731; }
+.alert-info { background-color: rgba(88, 166, 255, 0.1); color: #79c0ff; border-color: #58a6ff; }
 
 /* --- Responsividade Global --- */
+
+/* Para telas menores que 768px (tablets e celulares) */
 @media (max-width: 768px) {
     body {
-        flex-direction: column;
+        flex-direction: column; /* Sidebar e conteúdo empilham verticalmente */
     }
 
     .sidebar {
-        width: 100%;
-        height: auto;
-        position: static;
+        width: 100%; /* Sidebar ocupa a largura total */
+        height: auto; /* Altura automática */
+        position: static; /* Remove sticky para rolar com a página */
         border-right: none;
         border-bottom: 1px solid var(--border-color);
         padding: 15px 25px;
-        flex-direction: row;
-        justify-content: space-between;
+        flex-direction: row; /* Itens da sidebar horizontalmente */
+        justify-content: space-between; /* Espaça logo e logout */
         align-items: center;
-        z-index: 100;
+        z-index: 100; /* Z-index mais alto para a sidebar em mobile também */
     }
 
     .sidebar-header {
@@ -235,7 +199,7 @@ p.subtitle {
     }
 
     .sidebar-nav {
-        display: none;
+        display: none; /* Esconde a navegação principal em mobile por padrão */
     }
 
     .sidebar-logout {
@@ -249,35 +213,35 @@ p.subtitle {
     }
 
     .sidebar-footer {
-        display: none;
+        display: none; /* Esconde o rodapé em mobile */
     }
 
     .main-content {
-        padding: 20px;
+        padding: 20px; /* Reduz o padding do conteúdo principal em mobile */
     }
 
     h1 {
-        font-size: 2em;
+        font-size: 2em; /* Ajusta o tamanho do h1 em mobile */
     }
 
     p.subtitle {
-        font-size: 1em;
+        font-size: 1em; /* Ajusta o tamanho do subtítulo em mobile */
     }
 
+    /* Ajuste para mensagens flash em telas pequenas */
     .alert {
-        max-width: 90%;
+        max-width: 90%; /* Ocupa mais largura em telas pequenas */
     }
 }
 
+/* Para telas muito pequenas (celulares) */
 @media (max-width: 480px) {
     .main-content {
-        padding: 15px;
+        padding: 15px; /* Reduz ainda mais o padding */
     }
-
     h1 {
         font-size: 1.8em;
     }
-
     p.subtitle {
         font-size: 0.9em;
     }
