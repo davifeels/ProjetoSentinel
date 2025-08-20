@@ -210,13 +210,67 @@
         min-width: unset; /* Remove largura mínima em telas muito pequenas */
         width: 100%; /* Ocupa a largura total */
     }
-    .user-actions {
-        flex-direction: column; /* Empilha os botões em telas muito pequenas */
-        gap: 5px;
+    
+    /* --- INÍCIO DAS REGRAS REFINADAS PARA A TABELA RESPONSIVA --- */
+    .users-table {
+        border: none;
     }
-    .user-actions .reset-password-button,
-    .user-actions .delete-button-danger {
-        width: 100%; /* Botões ocupam a largura total */
+    .users-table thead {
+        display: none;
+    }
+    .users-table tr {
+        display: block;
+        margin-bottom: 20px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 15px;
+        background-color: var(--bg-dark);
+    }
+
+    /* Ajuste para usar Flexbox e alinhar corretamente o rótulo e o valor */
+    .users-table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        text-align: right;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+    .users-table td:last-child {
+        border-bottom: none;
+    }
+
+    /* O rótulo (::before) se torna um item flexível */
+    .users-table td::before {
+        content: attr(data-label);
+        text-align: left;
+        font-weight: 600;
+        color: var(--text-secondary);
+    }
+
+    /* A célula "Ação" empilha seu conteúdo verticalmente */
+    .users-table td[data-label="Ação"] {
+        flex-direction: column;
+        align-items: flex-start; /* Alinha o rótulo "Ação" à esquerda */
+    }
+
+    /* O contêiner dos botões ocupa toda a largura */
+    .users-table td[data-label="Ação"] .user-actions {
+        width: 100%;
+        margin-top: 10px; /* Espaço entre o rótulo "Ação" e os botões */
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px; /* Espaço entre os botões empilhados */
+    }
+    
+    /* Os botões dentro do card ocupam 100% da largura */
+    .users-table td[data-label="Ação"] .user-actions .reset-password-button,
+    .users-table td[data-label="Ação"] .user-actions .delete-button-danger {
+        width: 100%;
         text-align: center;
+        justify-content: center;
+        padding: 10px;
+        font-size: 1em; /* Aumenta um pouco a fonte para melhor toque */
     }
+    /* --- FIM DAS REGRAS REFINADAS --- */
 }

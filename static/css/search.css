@@ -91,6 +91,12 @@ input[type="file"] {
     background-color: rgba(88, 166, 255, 0.05);
 }
 
+/* NOVO: Estilo para o feedback visual de drag-and-drop */
+.custom-file-upload.drag-over {
+    border-color: var(--accent-blue);
+    background-color: rgba(88, 166, 255, 0.1);
+}
+
 .custom-file-upload-text {
     color: var(--text-primary);
     font-weight: 600;
@@ -256,6 +262,46 @@ input[type="file"] {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+/* --- NOVO: Estilos para múltiplos rostos --- */
+.multiple-faces-container {
+    width: 100%;
+    max-width: 600px;
+    margin-top: 40px;
+    text-align: center;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 30px;
+}
+.multiple-faces-container h3 {
+    font-size: 1.2em;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+}
+.faces-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+.face-card {
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.face-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(88, 166, 255, 0.2);
+}
+.face-card img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid var(--border-color);
+}
+/* --- FIM: Estilos para múltiplos rostos --- */
+
 
 /* --- Design Responsivo para Dispositivos Móveis --- */
 @media (max-width: 600px) {

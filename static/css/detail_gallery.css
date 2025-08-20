@@ -92,7 +92,7 @@
     font-size: 0.9em;
     min-height: 80px;
 }
-.status-em-observação { color: #d4a731; }
+.status-em-observacao { color: #d4a731; }
 .status-ativo { color: var(--accent-green); }
 .status-procurado { color: var(--accent-red); }
 .status-inativo { color: #8b949e; }
@@ -190,7 +190,10 @@
 /* Media Queries */
 @media (max-width: 1024px) {
     .dossier-grid { grid-template-columns: 1fr; }
-    .dossier-info-panel { position: static; }
+    .dossier-info-panel { 
+        position: static; 
+        top: auto; /* Adicionado para garantir que o elemento não se mantenha "sticky" em telas menores */
+    }
     .add-photo-form {
         grid-template-columns: 1fr;
     }
@@ -202,4 +205,3 @@
     .dossier-details li { font-size: 0.9em; }
     .add-photo-form { padding: 15px; }
 }
-

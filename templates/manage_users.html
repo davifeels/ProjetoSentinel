@@ -19,18 +19,14 @@
                 <input id="username" type="text" name="username" required>
             </div>
 
-            <input id="password" type="hidden" name="password" required>
-            
             <div class="form-group">
-                <label>Senha de Acesso</label>
-                <button type="button" id="generate-password-btn" class="generate-btn">
+                <label for="password">Senha de Acesso *</label>
+                <input id="password" type="text" name="password" required readonly>
+                <button type="button" id="generate-password-btn" class="generate-btn" style="margin-top: 10px;">
                     Gerar Senha
                 </button>
             </div>
-
-            <div id="generated-password-display" class="credentials-display" style="display: none;">
-                </div>
-
+            
             <div class="form-group">
                 <label for="expiration_type">Duração do Acesso *</label>
                 <select id="expiration_type" name="expiration_type" required>
@@ -58,15 +54,15 @@
             <tbody>
                 {% for user in users %}
                 <tr>
-                    <td>{{ user.username }}</td>
-                    <td>
+                    <td data-label="Usuário">{{ user.username }}</td>
+                    <td data-label="Expiração">
                         {% if user.expiration_date %}
                             {{ user.expiration_date.strftime('%d/%m/%Y às %H:%M') }} (UTC)
                         {% else %}
                             <span class="status-vitalicio">Vitalício</span>
                         {% endif %}
                     </td>
-                    <td>
+                    <td data-label="Ação">
                         {% if user.id != 1 %}
                             <div class="user-actions">
                                 <a href="{{ url_for('reset_user_password', user_id=user.id) }}" class="reset-password-button">Redefinir Senha</a>
@@ -89,9 +85,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const generateBtn = document.getElementById('generate-password-btn'); 
-    const usernameInput = document.getElementById('username'); 
     const passwordInput = document.getElementById('password');
-    const displayDiv = document.getElementById('generated-password-display'); 
 
     function generateRandomString(length, chars) {
         let result = '';
@@ -103,15 +97,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function generateAndSetPassword() { 
         const password = generateRandomString(12, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*');
-        
         passwordInput.value = password;
-
-        displayDiv.innerHTML = `
-            <div class="credential-item">
-                <strong>Senha:</strong> <span>${password}</span>
-            </div>
-        `;
-        displayDiv.style.display = 'block';
     }
 
     generateBtn.addEventListener('click', generateAndSetPassword);

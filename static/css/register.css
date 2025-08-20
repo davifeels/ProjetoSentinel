@@ -1,29 +1,27 @@
-/* static/css/register.css (Versão Agressiva para Otimização de Largura e Espaçamento) */
+/* static/css/register.css (Versão Final e Otimizada para Responsividade) */
 
 .register-form-panel {
-    max-width: 98vw; /* MUDANÇA AQUI: Ocupa 98% da largura da viewport */
+    max-width: 98vw;
     margin-left: auto;
     margin-right: auto;
-    background-color: var(--card-bg); /* MUDANÇA AQUI: Adiciona um fundo para visualizar a área */
-    border: 1px solid var(--border-color); /* MUDANÇA AQUI: Adiciona uma borda para visualizar a área */
-    border-radius: 8px; /* Mantém o arredondamento */
-    padding: 40px; /* MUDANÇA AQUI: Aumenta o padding interno para preencher mais */
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Sombra para visualização */
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 40px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .form-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr; /* Padrão: 2 colunas para telas maiores */
-    gap: 180px; /* MUDANÇA AQUI: Aumenta MUITO o espaçamento entre as colunas */
-    padding: 0 80px; /* MUDANÇA AQUI: Aumenta o padding lateral para o grid */
+    grid-template-columns: 1fr 1fr;
+    gap: 180px;
+    padding: 0 80px;
 }
 
-/* Garante que as colunas também se expandam */
 .form-column {
     width: 100%;
 }
 
-/* Estilos para os títulos das colunas (Dados Principais, Contatos e Parentesco) */
 .form-column h3 {
     font-size: 1.3em;
     font-weight: 600;
@@ -47,7 +45,7 @@
 .register-form-panel input[type="text"],
 .register-form-panel input[type="date"],
 .register-form-panel input[type="email"],
-.register-form-panel select, 
+.register-form-panel select,
 .register-form-panel textarea {
     width: 100%;
     padding: 13px;
@@ -61,7 +59,7 @@
 }
 
 .register-form-panel input:focus,
-.register-form-panel select:focus, 
+.register-form-panel select:focus,
 .register-form-panel textarea:focus {
     outline: none;
     border-color: var(--accent-blue);
@@ -73,10 +71,12 @@
     min-height: 140px;
 }
 
+/* NOVO ESTILO: Ajusta o input de arquivo para ser responsivo */
 .custom-file-input {
     display: flex;
+    flex-wrap: nowrap; /* Impede a quebra de linha dos elementos internos */
     align-items: center;
-    gap: 15px;
+    gap: 10px; /* Reduz o gap para telas pequenas */
     background-color: var(--bg-dark);
     border: 1px solid var(--border-color);
     border-radius: 6px;
@@ -84,16 +84,13 @@
     transition: all 0.2s ease-in-out;
     cursor: pointer;
 }
-
 .custom-file-input:has(input:focus) {
     border-color: var(--accent-blue);
     box-shadow: 0 0 0 3px rgba(88, 166, 253, 0.2);
 }
-
 .input-file {
     display: none;
 }
-
 .btn-file {
     display: inline-flex;
     align-items: center;
@@ -105,21 +102,20 @@
     white-space: nowrap;
     transition: all 0.2s ease;
 }
-
 .custom-file-input:hover .btn-file {
     background-color: var(--accent-blue);
     color: #ffffff;
 }
-
 .file-chosen-text {
     color: var(--text-secondary);
     font-size: 0.9em;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    flex-grow: 1; /* Permite que o texto preencha o espaço restante */
 }
 
-/* Estilo do Botão "Registrar" */
+
 form > button[type="submit"] {
     display: block;
     width: auto;
@@ -138,46 +134,91 @@ form > button[type="submit"] {
     text-align: center;
     transition: background-color 0.2s ease;
 }
-
 form > button[type="submit"]:hover {
     background-color: #82c8ff;
 }
 
 /* --- Media query para telas menores (mobile e tablets em retrato) --- */
-@media (max-width: 1024px) { 
+@media (max-width: 1024px) {
     .register-form-panel {
-        max-width: 100%; /* Ocupa a largura total em telas pequenas */
-        background-color: transparent; /* Remove o fundo do painel */
-        border: none; /* Remove a borda do painel */
-        box-shadow: none; /* Remove a sombra do painel */
-        padding: 0; /* Remove todo o padding do painel principal em mobile */
+        max-width: 100%;
+        background-color: transparent;
+        border: none;
+        box-shadow: none;
+        padding: 0;
     }
     .form-grid {
-        grid-template-columns: 1fr; /* Força uma única coluna */
-        gap: 0; /* Remove o espaçamento entre colunas */
-        padding: 0 20px; /* Adiciona padding lateral para o grid em mobile */
+        grid-template-columns: 1fr;
+        gap: 0; /* CORREÇÃO: Reseta o gap para 0 */
+        padding: 0 20px;
     }
-    /* Estilos específicos para a segunda coluna quando ela se torna uma linha */
     .form-column:nth-child(2) {
-        margin-top: 40px; /* Adiciona espaçamento entre as seções (Dados Principais e Contatos) */
+        margin-top: 40px;
     }
     .form-group {
-        margin-bottom: 18px; /* Ajusta espaçamento entre grupos */
+        margin-bottom: 18px;
     }
     form > button[type="submit"] {
         min-width: unset;
         width: 100%;
     }
-    /* Ajustes para os títulos das colunas em mobile */
     .form-column h3 {
-        margin-top: 0; /* Remove margem superior extra nos títulos que agora são linhas */
-        font-size: 1.4em; /* Aumenta um pouco o tamanho para mobile */
+        margin-top: 0;
+        font-size: 1.4em;
         padding-bottom: 10px;
         border-bottom: 1px solid var(--border-color);
-        text-align: left; /* Garante que o título esteja alinhado à esquerda */
+        text-align: left;
     }
     .form-column:first-child h3 {
-        margin-top: 0; /* O primeiro título da página não precisa de margem superior extra */
+        margin-top: 0;
+    }
+}
+
+/* NOVO: Media query para telas ultra-pequenas (até 480px) */
+@media (max-width: 480px) {
+    .register-form-panel {
+        padding: 0 10px;
+    }
+    .form-grid {
+        padding: 0; /* CORREÇÃO: Reseta o padding para 0 */
+        gap: 0; /* CORREÇÃO: Reseta o gap para 0 */
+    }
+    .form-column:nth-child(2) {
+        margin-top: 30px;
+    }
+    .form-group {
+        margin-bottom: 15px;
+    }
+    .form-column h3 {
+        font-size: 1.2em;
+    }
+    .register-form-panel input[type="text"],
+    .register-form-panel input[type="date"],
+    .register-form-panel input[type="email"],
+    .register-form-panel select,
+    .register-form-panel textarea {
+        padding: 10px;
+        font-size: 0.9em;
+    }
+    .custom-file-input {
+        flex-direction: column; /* FORÇA os itens a se empilharem verticalmente */
+        align-items: flex-start;
+        gap: 5px;
+        padding: 10px;
+    }
+    .btn-file {
+        width: 100%; /* Botão ocupa a largura total */
+        text-align: center;
+        justify-content: center;
+    }
+    .file-chosen-text {
+        font-size: 0.8em;
+        width: 100%; /* Ocupa a largura total e o overflow será tratado */
+        text-align: left;
+    }
+    form > button[type="submit"] {
+        padding: 12px;
+        font-size: 1em;
     }
 }
 
@@ -190,8 +231,6 @@ form > button[type="submit"]:hover {
     padding-top: 20px;
     border-top: 1px solid var(--border-color);
 }
-
-/* Estilo base para ambos os botões */
 .form-actions .save-button,
 .form-actions .cancel-button {
     padding: 12px 28px;
@@ -203,27 +242,21 @@ form > button[type="submit"]:hover {
     cursor: pointer;
     transition: all 0.2s ease-in-out;
 }
-
-/* Estilo do botão principal "Salvar Alterações" */
 .form-actions .save-button {
     background-color: var(--accent-blue);
     color: var(--bg-dark);
     border-color: var(--accent-blue);
 }
-
 .form-actions .save-button:hover {
     background-color: #82c8ff;
     border-color: #82c8ff;
     transform: translateY(-2px);
 }
-
-/* Estilo do botão secundário "Cancelar" */
 .form-actions .cancel-button {
     background-color: transparent;
     color: var(--text-secondary);
     border-color: var(--border-color);
 }
-
 .form-actions .cancel-button:hover {
     background-color: var(--border-color);
     color: var(--text-primary);

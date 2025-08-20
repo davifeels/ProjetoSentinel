@@ -29,4 +29,4 @@ RUN pip install --upgrade pip \
 EXPOSE 5000
 
 # Comando padrão
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--timeout", "120", "app:app"]

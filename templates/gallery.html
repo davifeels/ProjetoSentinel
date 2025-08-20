@@ -20,23 +20,11 @@
         </form>
     </div>
 
-    {# REMOVIDO: O bloco de mensagens flash duplicado. O layout.html já lida com isso. #}
-    {#
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="alert alert-{{ category }}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-    #}
-
     <div class="profile-grid" id="profile-grid-container">
         {% for person in people.items %}
         <a href="{{ url_for('person_detail', person_id=person.id) }}" class="profile-card-link">
             <div class="profile-card">
                 
-                {# --- LÓGICA ATUALIZADA PARA ENCONTRAR A FOTO DE PERFIL --- #}
                 {% set profile_photo = person.photos|selectattr('photo_type', 'equalto', 'profile')|first %}
                 
                 {% if profile_photo %}

@@ -1,4 +1,4 @@
-/* static/css/gallery.css (VERSÃO FINAL AJUSTADA E COMPLETA) */
+/* static/css/gallery.css (VERSÃO FINAL COM AJUSTES DE RESPONSIVIDADE) */
 
 .profile-grid {
     display: grid;
@@ -225,4 +225,20 @@ p.subtitle {
     margin-left: auto;
     margin-right: auto;
     text-align: center;
+}
+
+
+/* NOVO: Estilo para corrigir o layout da barra de busca em telas menores */
+@media (max-width: 768px) {
+    .search-bar-container form {
+        flex-direction: column; /* Empilha os elementos verticalmente */
+        gap: 10px; /* Adiciona espaçamento entre eles */
+    }
+    .search-bar-container input[type="text"] {
+        flex-grow: unset; /* Desabilita o crescimento para largura total */
+        width: 100%; /* O input ocupa a largura total */
+    }
+    .search-bar-container button {
+        width: 100%; /* O botão ocupa a largura total */
+    }
 }

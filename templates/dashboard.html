@@ -3,71 +3,93 @@
 {% block title %}Dashboard | SentinelVision{% endblock %}
 
 {% block head_css %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 {% endblock %}
 
 {% block content %}
-    <div class="dashboard-header-container">
-        <h1>Dashboard de Inteligência</h1>
-        <p class="subtitle">Visão geral e estatísticas do banco de dados biométrico.</p>
-        {# Adiciona a saudação ao usuário logado #}
-        {% if current_user.is_authenticated %}
-            <div class="user-greeting">
-                Olá, {{ current_user.username }}!
-            </div>
-        {% endif %}
+<div class="dashboard-header-container">
+<h1>Dashboard de Inteligência</h1>
+<p class="subtitle">Visão geral e estatísticas do banco de dados biométrico.</p>
+{# Adiciona a saudação ao usuário logado #}
+{% if current_user.is_authenticated %}
+<div class="user-greeting">
+Olá, {{ current_user.username }}!
+</div>
+{% endif %}
+</div>
+
+<div class="dashboard-grid">
+    <div class="dashboard-card stat-card">
+        <h3>Total de Perfis</h3>
+        <p class="stat-number">{{ total_profiles }}</p>
+        <span class="stat-description">Indivíduos no sistema</span>
     </div>
 
-    <div class="dashboard-grid">
-        <div class="dashboard-card stat-card">
-            <h3>Total de Perfis</h3>
-            <p class="stat-number">{{ total_profiles }}</p>
-            <span class="stat-description">Indivíduos no sistema</span>
-        </div>
-
-        <div class="dashboard-card chart-card">
-            <h3>Distribuição por Status</h3>
-            <div class="chart-container">
-                <canvas id="statusChart"></canvas>
-            </div>
-        </div>
-
-        <div class="dashboard-card activity-card">
-            <h3>Cadastros Recentes</h3>
-            <ul class="activity-list">
-                {% for person in recent_profiles %}
-                <li>
-                    <a href="{{ url_for('person_detail', person_id=person.id) }}">
-                        
-                        {% set profile_photo = person.photos|selectattr('photo_type', 'equalto', 'profile')|first %}
-                        
-                        {% if profile_photo %}
-                            <img src="{{ url_for('static', filename='db_images/' + profile_photo.filename) }}" alt="Foto de {{ person.name }}">
-                        {% else %}
-                            <div class="placeholder-image" style="width: 45px; height: 45px; background: #30363d; border-radius: 50%;"></div>
-                        {% endif %}
-
-                        <div class="activity-info">
-                            <span class="activity-name">{{ person.name }}</span>
-                            <span class="activity-time">{{ person.registration_date.strftime('%d/%m/%Y') }}</span>
-                        </div>
-                    </a>
-                </li>
-                {% else %}
-                <li class="no-activity">Nenhuma atividade recente.</li>
-                {% endfor %}
-            </ul>
+    <div class="dashboard-card chart-card hide-on-mobile">
+        <h3>Distribuição por Status</h3>
+        <div class="chart-container">
+            <canvas id="statusChart"></canvas>
         </div>
     </div>
+
+    <div class="dashboard-card status-grid-container hide-on-desktop">
+        <h3>Distribuição por Status</h3>
+        <div class="status-grid">
+            {% for item in chart_data %}
+                <div class="status-block status-{{ item.label|lower|replace(' ', '-') }}">
+                    <p class="status-count">{{ item.count }}</p>
+                    <span class="status-label">{{ item.label }}</span>
+                </div>
+            {% else %}
+                <div class="status-block no-status">
+                    <p class="status-count">0</p>
+                    <span class="status-label">Nenhum status</span>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="dashboard-card activity-card">
+        <h3>Cadastros Recentes</h3>
+        <ul class="activity-list">
+            {% for person in recent_profiles %}
+            <li>
+                <a href="{{ url_for('person_detail', person_id=person.id) }}">
+                    
+                    {% set profile_photo = person.photos|selectattr('photo_type', 'equalto', 'profile')|first %}
+                    
+                    {% if profile_photo %}
+                        <img src="{{ url_for('static', filename='db_images/' + profile_photo.filename) }}" alt="Foto de {{ person.name }}">
+                    {% else %}
+                        <div class="placeholder-image" style="width: 45px; height: 45px; background: #30363d; border-radius: 50%;"></div>
+                    {% endif %}
+
+                    <div class="activity-info">
+                        <span class="activity-name">{{ person.name }}</span>
+                        <span class="activity-time">{{ person.registration_date.strftime('%d/%m/%Y') }}</span>
+                    </div>
+                </a>
+            </li>
+            {% else %}
+            <li class="no-activity">Nenhuma atividade recente.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block scripts %}
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-    const ctx = document.getElementById('statusChart');
-    const statusData = {{ status_chart_data.data|tojson|safe }};
-    const statusLabels = {{ status_chart_data.labels|tojson|safe }};
+const ctx = document.getElementById('statusChart');
+// Verifica se o elemento canvas existe na página antes de criar o gráfico
+if (ctx) {
+const statusData = {{ status_chart_data.data|tojson|safe }};
+const statusLabels = {{ status_chart_data.labels|tojson|safe }};
+const statusColors = {{ status_chart_data.colors|tojson|safe }};
 
     new Chart(ctx, {
         type: 'doughnut',
@@ -76,7 +98,7 @@
             datasets: [{
                 label: 'Perfis',
                 data: statusData,
-                backgroundColor: {{ status_chart_data.colors|tojson|safe }},
+                backgroundColor: statusColors,
                 borderWidth: 1
             }]
         },
@@ -97,5 +119,7 @@
             }
         }
     });
+}
 </script>
+
 {% endblock %}

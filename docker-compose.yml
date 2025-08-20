@@ -6,14 +6,16 @@ services:
       - "5000:5000"
     volumes:
       - .:/app
-    environment:
-      # A senha do banco de dados agora é definida aqui para garantir a conexão.
-      # Usando a senha 'admin' definida no serviço 'db'.
-      - FLASK_APP=app.py
-      - DATABASE_URL=postgresql://postgres:admin@db/sentinelvision_db
+    # Linha removida
+    # environment:
+    #   - FLASK_APP=app.py
+    #   - DATABASE_URL=postgresql://postgres:admin@db/sentinelvision_db
+    # Adicionada esta nova linha
+    env_file:
+      - .env
     depends_on:
       - db
-
+  
   db:
     image: postgres:16
     container_name: sentinelvision_db
@@ -22,7 +24,6 @@ services:
     environment:
       - POSTGRES_DB=sentinelvision_db
       - POSTGRES_USER=postgres
-      # A senha agora está definida de forma fixa para testes.
       - POSTGRES_PASSWORD=admin
     ports:
       - "5432:5432"

@@ -17,7 +17,7 @@
                     <h3>Dados Pessoais</h3>
                     <div class="form-group">
                         <label for="name">Nome Completo *</label>
-                        <input id="name" type="text" name="name" value="{{ person.name }}" required>
+                        <input id="name" type="text" name="name" value="{{ person.name }}" required maxlength="100">
                     </div>
                     <div class="form-group">
                         <label for="status">Status</label>
@@ -30,7 +30,7 @@
                     </div>
                     <div class="form-group">
                         <label for="doc_number">Nº de Documento</label>
-                        <input id="doc_number" type="text" name="doc_number" value="{{ person.doc_number or '' }}">
+                        <input id="doc_number" type="text" name="doc_number" value="{{ person.doc_number or '' }}" maxlength="50" pattern="^(\d{3}\.?\d{3}\.?\d{3}-?\d{2})|(\d{11})$">
                     </div>
                     <div class="form-group">
                         <label for="date_of_birth">Data de Nascimento</label>
@@ -38,7 +38,7 @@
                     </div>
                     <div class="form-group">
                         <label for="gender">Gênero</label>
-                        <input id="gender" type="text" name="gender" value="{{ person.gender or '' }}">
+                        <input id="gender" type="text" name="gender" value="{{ person.gender or '' }}" maxlength="50">
                     </div>
                      <div class="form-group">
                         <label for="address">Endereço Completo</label>
@@ -50,23 +50,23 @@
                     <h3>Contatos e Parentesco</h3>
                     <div class="form-group">
                         <label for="phones">Telefone(s)</label>
-                        <input id="phones" type="text" name="phones" placeholder="Separados por vírgula" value="{{ person.phones or '' }}">
+                        <input id="phones" type="text" name="phones" placeholder="Separados por vírgula" value="{{ person.phones or '' }}" maxlength="255">
                     </div>
                     <div class="form-group">
                         <label for="emails">E-mail(s)</label>
-                        <input id="emails" type="text" name="emails" placeholder="Separados por vírgula" value="{{ person.emails or '' }}">
+                        <input id="emails" type="text" name="emails" placeholder="Separados por vírgula" value="{{ person.emails or '' }}" maxlength="255">
                     </div>
                     <div class="form-group">
                         <label for="father_name">Nome do Pai</label>
-                        <input id="father_name" type="text" name="father_name" value="{{ person.father_name or '' }}">
+                        <input id="father_name" type="text" name="father_name" value="{{ person.father_name or '' }}" maxlength="100">
                     </div>
                     <div class="form-group">
                         <label for="mother_name">Nome da Mãe</label>
-                        <input id="mother_name" type="text" name="mother_name" value="{{ person.mother_name or '' }}">
+                        <input id="mother_name" type="text" name="mother_name" value="{{ person.mother_name or '' }}" maxlength="100">
                     </div>
                     <div class="form-group">
                         <label for="spouse">Cônjuge(s)</label>
-                        <input id="spouse" type="text" name="spouse" placeholder="Separados por vírgula" value="{{ person.spouse or '' }}">
+                        <input id="spouse" type="text" name="spouse" placeholder="Separados por vírgula" value="{{ person.spouse or '' }}" maxlength="255">
                     </div>
                     <div class="form-group">
                         <label for="children">Filho(s)</label>

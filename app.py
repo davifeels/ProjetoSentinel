@@ -1,11 +1,9 @@
-# app.py (Versão Final com Lógica de Análise de Galeria Aprimorada e correção de erros)
-
 import os
 import uuid
 import numpy as np
 import faiss
 import cv2
-from flask import Flask, request, render_template, url_for, redirect, flash, jsonify, abort
+from flask import Flask, request, render_template, url_for, redirect, flash, jsonify, abort, send_from_directory
 from werkzeug.utils import secure_filename
 import face_recognition
 from flask_sqlalchemy import SQLAlchemy
@@ -14,7 +12,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import or_
 from sqlalchemy.exc import IntegrityError
 from datetime import date, datetime, timedelta
-import logging 
+import logging
+from PIL import Image
+from io import BytesIO
+
 
 # --- CONFIGURAÇÃO INICIAL ---
 app = Flask(__name__)
@@ -91,9 +92,9 @@ def save_faiss_index():
     global faiss_index
     try:
         faiss.write_index(faiss_index, FAISS_INDEX_PATH)
-        logger.info(f"FAISS: Índice salvo em: {FAISS_INDEX_PATH}") 
+        logger.info(f"FAISS: Índice salvo em: {FAISS_INDEX_PATH}")
     except Exception as e:
-        logger.error(f"FAISS: Erro ao salvar o índice FAISS: {e}") 
+        logger.error(f"FAISS: Erro ao salvar o índice FAISS: {e}")
 
 def build_faiss_from_db():
     global faiss_index
@@ -104,9 +105,9 @@ def build_faiss_from_db():
             encodings = np.array([np.frombuffer(p.face_encoding, dtype=np.float64) for p in photos]).astype('float32')
             ids = np.array([p.id for p in photos])
             faiss_index.add_with_ids(encodings, ids)
-            logger.info(f"FAISS: Índice construído do DB com {faiss_index.ntotal} entradas.") 
+            logger.info(f"FAISS: Índice construído do DB com {faiss_index.ntotal} entradas.")
         else:
-            logger.info("FAISS: Nenhum perfil encontrado no DB para construir o índice.") 
+            logger.info("FAISS: Nenhum perfil encontrado no DB para construir o índice.")
     save_faiss_index()
 
 def load_or_build_faiss_index():
@@ -115,20 +116,32 @@ def load_or_build_faiss_index():
         try:
             faiss_index = faiss.read_index(FAISS_INDEX_PATH)
             with app.app_context():
-                db_count = Photo.query.count() 
-                logger.info(f"FAISS: Índice carregado do disco com {faiss_index.ntotal} entradas. DB tem {db_count} entradas.") 
+                db_count = Photo.query.count()
+                logger.info(f"FAISS: Índice carregado do disco com {faiss_index.ntotal} entradas. DB tem {db_count} entradas.")
                 if faiss_index.ntotal != db_count:
-                    logger.warning("FAISS: Contagem de entradas no índice não corresponde ao DB. Reconstruindo...") 
+                    logger.warning("FAISS: Contagem de entradas no índice não corresponde ao DB. Reconstruindo...")
                     build_faiss_from_db()
-                elif faiss_index.ntotal == 0 and db_count > 0: 
+                elif faiss_index.ntotal == 0 and db_count > 0:
                     logger.warning("FAISS: Índice no disco está vazio mas DB não. Reconstruindo...")
                     build_faiss_from_db()
         except Exception as e:
-            logger.error(f"FAISS: Erro ao carregar índice existente, reconstruindo do DB: {e}") 
+            logger.error(f"FAISS: Erro ao carregar índice existente, reconstruindo do DB: {e}")
             build_faiss_from_db()
     else:
-        logger.info("FAISS: Arquivo de índice não encontrado. Construindo do DB...") 
+        logger.info("FAISS: Arquivo de índice não encontrado. Construindo do DB...")
         build_faiss_from_db()
+
+def preprocess_image(image_path):
+    img = Image.open(image_path)
+    if img.width > 800:
+        ratio = 800 / img.width
+        new_height = int(img.height * ratio)
+        img = img.resize((800, new_height), Image.Resampling.LANCZOS)
+    
+    img_byte_arr = BytesIO()
+    img.save(img_byte_arr, format='JPEG')
+    img_byte_arr.seek(0)
+    return img_byte_arr
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -189,10 +202,13 @@ def dashboard():
     status_labels = [status if status else 'Não Especificado' for status, count in status_counts]
     status_data = [count for status, count in status_counts]
     background_colors = [color_map.get(label, 'rgba(139, 148, 158, 0.7)') for label in status_labels]
-    status_chart_data = { 'labels': status_labels, 'data': status_data, 'colors': background_colors }
+    
+    chart_data = [{'label': label, 'count': count} for label, count in zip(status_labels, status_data)]
+    status_chart_data = {'labels': status_labels, 'data': status_data, 'colors': background_colors}
+    
     recent_profiles = profiles_query.order_by(Person.registration_date.desc()).limit(5).all()
     
-    return render_template('dashboard.html', total_profiles=total_profiles, status_chart_data=status_chart_data, recent_profiles=recent_profiles)
+    return render_template('dashboard.html', total_profiles=total_profiles, status_chart_data=status_chart_data, chart_data=chart_data, recent_profiles=recent_profiles)
 
 
 @app.route('/search', methods=['POST'])
@@ -208,47 +224,48 @@ def search():
         logger.warning("Nome de arquivo inválido.")
         return jsonify({'error': 'Nome de arquivo inválido.'}), 400
     
-    # Salva o arquivo temporariamente para processar
     temp_filename = secure_filename(f"temp_search_{uuid.uuid4().hex[:8]}.jpg")
     temp_path = os.path.join(app.config['UPLOAD_FOLDER'], temp_filename)
     file.save(temp_path)
-    logger.info(f"Arquivo temporário de busca salvo em: {temp_path}")
 
     try:
         search_image = face_recognition.load_image_file(temp_path)
         search_encodings = face_recognition.face_encodings(search_image)
         logger.info(f"Rostos detectados na imagem de busca: {len(search_encodings)}")
     except Exception as e:
+        logger.error(f"Erro ao processar a imagem de busca: {e}")
+        return jsonify({'error': f'Não foi possível processar a imagem. Verifique se a imagem é válida: {e}'}), 500
+    finally:
         if os.path.exists(temp_path):
             os.remove(temp_path)
-        logger.error(f"Erro ao processar a imagem de busca: {e}")
-        return jsonify({'error': f'Não foi possível processar a imagem: {e}'}), 500
     
     if not search_encodings: 
-        os.remove(temp_path)
         logger.info("Nenhum rosto detectado na imagem de busca.")
         return jsonify({'status': 'Nenhum rosto detectado na imagem.'})
     
     if len(search_encodings) > 1: 
-        os.remove(temp_path)
         logger.warning(f"Múltiplos rostos ({len(search_encodings)}) detectados na imagem de busca.")
         return jsonify({'error': f'Múltiplos rostos ({len(search_encodings)}) detectados.'}), 400
     
     search_encoding = np.array(search_encodings[0]).astype('float32').reshape(1, -1)
     
     if faiss_index.ntotal == 0: 
-        os.remove(temp_path)
         logger.info("Índice FAISS vazio. Nenhum perfil cadastrado para comparação.")
         return jsonify({'status': 'Nenhum perfil cadastrado para comparação.'})
     
-    distances, photo_ids = faiss_index.search(search_encoding, k=5)
-    
+    try:
+        distances, photo_ids = faiss_index.search(search_encoding, k=5)
+    except Exception as e:
+        logger.error(f"FAISS: Erro durante a busca. Reconstruindo índice. Erro: {e}")
+        build_faiss_from_db()
+        return jsonify({'error': 'Erro ao realizar a busca. O índice foi reconstruído, tente novamente.'}), 500
+
     found_people = {}
     best_match_id = -1
     best_avg_distance = FAISS_SIMILARITY_THRESHOLD
     
     for i, dist in zip(photo_ids[0], distances[0]):
-        if i != -1:
+        if i != -1 and dist < FAISS_SIMILARITY_FOR_SUGGESTIONS:
             photo = Photo.query.get(int(i))
             if photo and photo.person:
                 person_id = photo.person_id
@@ -266,21 +283,17 @@ def search():
         matched_person = Person.query.get(best_match_id)
         
         if matched_person:
-            logger.info(f"Correspondência encontrada para {matched_person.name} (ID: {best_match_id}).")
             if matched_person.user_id != current_user.id and current_user.role != 'ADMIN':
-                os.remove(temp_path)
-                logger.warning(f"Acesso negado: Usuário {current_user.username} tentou acessar perfil {matched_person.name} (ID: {best_match_id}) de outro usuário.")
+                logger.warning(f"Acesso negado: Usuário {current_user.username} tentou acessar perfil de outro usuário.")
                 return jsonify({'status': 'Nenhuma correspondência encontrada.'})
 
             sighting_filename = f"sighting_{best_match_id}_{uuid.uuid4().hex[:8]}.jpg"
             sighting_path = os.path.join(SIGHTING_IMAGES_FOLDER, sighting_filename)
             
-            os.rename(temp_path, sighting_path)
+            file.seek(0)
+            file.save(sighting_path)
             
             new_sighting = Photo(filename=sighting_filename, photo_type='sighting', person_id=best_match_id, face_encoding=search_encoding.tobytes())
-            
-            profile_photo = Photo.query.filter_by(person_id=matched_person.id, photo_type='profile').first()
-            profile_photo_url = url_for('static', filename=f'db_images/{profile_photo.filename}') if profile_photo else ''
             
             db.session.add(new_sighting)
             db.session.commit()
@@ -288,11 +301,20 @@ def search():
             faiss_index.add_with_ids(search_encoding, np.array([new_sighting.id]))
             save_faiss_index()
 
+            profile_photo = Photo.query.filter_by(person_id=matched_person.id, photo_type='profile').first()
+            profile_photo_url = url_for('static', filename=f'db_images/{profile_photo.filename}') if profile_photo else ''
+
             logger.info(f"Avistamento registrado para {matched_person.name}.")
-            return jsonify({ 'status': 'success', 'person': { 'id': matched_person.id, 'name': matched_person.name, 'image_url': profile_photo_url, 'detail_url': url_for('person_detail', person_id=matched_person.id) } })
+            return jsonify({ 
+                'status': 'success', 
+                'person': { 
+                    'id': matched_person.id, 
+                    'name': matched_person.name, 
+                    'image_url': profile_photo_url, 
+                    'detail_url': url_for('person_detail', person_id=matched_person.id) 
+                } 
+            })
     
-    if os.path.exists(temp_path):
-        os.remove(temp_path)
     logger.info("Nenhuma correspondência encontrada com a similaridade necessária.")
     return jsonify({'status': 'Nenhuma correspondência encontrada.'})
 
@@ -303,32 +325,84 @@ def register():
     if request.method == 'POST':
         name = request.form.get('name')
         file = request.files.get('image')
+        
         if not name or not file or not file.filename:
             flash('Nome e imagem são obrigatórios.', 'error')
             return redirect(request.url)
 
-        profile_filename = secure_filename(f"profile_{name.replace(' ', '_').lower()}_{os.urandom(4).hex()}.jpg")
-        path = os.path.join(DB_IMAGES_FOLDER, profile_filename)
-        file.save(path)
-
-        try:
-            image = face_recognition.load_image_file(path)
-            encodings = face_recognition.face_encodings(image)
-        except Exception as e:
-            os.remove(path); flash(f'Erro ao processar a imagem: {e}.', 'error'); return redirect(request.url)
-
-        if not encodings or len(encodings) > 1:
-            os.remove(path); flash('Nenhum rosto ou múltiplos rostos detectados.', 'warning'); return redirect(request.url)
+        if len(name) > 100:
+            flash('O nome do indivíduo não pode exceder 100 caracteres.', 'error')
+            return redirect(request.url)
         
-        encoding_bytes = encodings[0].tobytes()
+        sanitized_name = name.strip().replace('<', '&lt;').replace('>', '&gt;')
+        
+        doc_number = request.form.get('doc_number')
+        if doc_number:
+            sanitized_doc_number = doc_number.strip().replace('<', '&lt;').replace('>', '&gt;')
+            if len(sanitized_doc_number) > 50:
+                 flash('O número de documento não pode exceder 50 caracteres.', 'error')
+                 return redirect(request.url)
+        else:
+            sanitized_doc_number = None
+
         dob_str = request.form.get('date_of_birth')
         date_of_birth_obj = date.fromisoformat(dob_str) if dob_str else None
 
-        doc_number = request.form.get('doc_number')
-        if doc_number == '':
-            doc_number = None
+        gender = request.form.get('gender')
+        sanitized_gender = gender.strip().replace('<', '&lt;').replace('>', '&gt;') if gender else None
+        
+        address = request.form.get('address')
+        sanitized_address = address.strip().replace('<', '&lt;').replace('>', '&gt;') if address else None
 
-        new_person = Person(name=name, status=request.form.get('status', 'Em Observação'), doc_number=doc_number, date_of_birth=date_of_birth_obj, gender=request.form.get('gender'), address=request.form.get('address'), phones=request.form.get('phones'), emails=request.form.get('emails'), father_name=request.form.get('father_name'), mother_name=request.form.get('mother_name'), spouse=request.form.get('spouse'), children=request.form.get('children'), notes=request.form.get('notes'), user_id=current_user.id)
+        phones = request.form.get('phones')
+        sanitized_phones = phones.strip().replace('<', '&lt;').replace('>', '&gt;') if phones else None
+        
+        emails = request.form.get('emails')
+        sanitized_emails = emails.strip().replace('<', '&lt;').replace('>', '&gt;') if emails else None
+        
+        father_name = request.form.get('father_name')
+        sanitized_father_name = father_name.strip().replace('<', '&lt;').replace('>', '&gt;') if father_name else None
+        
+        mother_name = request.form.get('mother_name')
+        sanitized_mother_name = mother_name.strip().replace('<', '&lt;').replace('>', '&gt;') if mother_name else None
+        
+        spouse = request.form.get('spouse')
+        sanitized_spouse = spouse.strip().replace('<', '&lt;').replace('>', '&gt;') if spouse else None
+
+        children = request.form.get('children')
+        sanitized_children = children.strip().replace('<', '&lt;').replace('>', '&gt;') if children else None
+        
+        notes = request.form.get('notes')
+        sanitized_notes = notes.strip().replace('<', '&lt;').replace('>', '&gt;') if notes else None
+
+        # --- AQUI ESTÁ A LÓGICA AJUSTADA PARA O PROCESSAMENTO DA IMAGEM ---
+        # Cria um nome de arquivo seguro e único
+        profile_filename = secure_filename(f"profile_{sanitized_name.replace(' ', '_').lower()}_{os.urandom(4).hex()}.jpg")
+        path = os.path.join(DB_IMAGES_FOLDER, profile_filename)
+        
+        # Salva o arquivo temporariamente para processamento
+        file.seek(0)
+        file.save(path)
+        
+        try:
+            # Processa a imagem a partir do arquivo salvo no disco
+            image = face_recognition.load_image_file(path)
+            encodings = face_recognition.face_encodings(image)
+        except Exception as e:
+            if os.path.exists(path):
+                os.remove(path)
+            flash(f'Erro ao processar a imagem: {e}.', 'error')
+            return redirect(request.url)
+        
+        if not encodings or len(encodings) > 1:
+            if os.path.exists(path):
+                os.remove(path)
+            flash('Nenhum rosto ou múltiplos rostos detectados. Por favor, envie uma imagem com apenas um rosto.', 'warning')
+            return redirect(request.url)
+        
+        encoding_bytes = encodings[0].tobytes()
+        
+        new_person = Person(name=sanitized_name, status=request.form.get('status', 'Em Observação'), doc_number=sanitized_doc_number, date_of_birth=date_of_birth_obj, gender=sanitized_gender, address=sanitized_address, phones=sanitized_phones, emails=sanitized_emails, father_name=sanitized_father_name, mother_name=sanitized_mother_name, spouse=sanitized_spouse, children=sanitized_children, notes=sanitized_notes, user_id=current_user.id)
         try:
             db.session.add(new_person)
             db.session.flush()
@@ -338,7 +412,7 @@ def register():
             new_encoding = np.array(encodings[0]).astype('float32').reshape(1, -1)
             faiss_index.add_with_ids(new_encoding, np.array([profile_photo.id]))
             save_faiss_index() 
-            flash(f'Perfil de {name} cadastrado com sucesso!', 'success')
+            flash(f'Perfil de {sanitized_name} cadastrado com sucesso!', 'success')
             return redirect(url_for('gallery'))
         except Exception as e:
             db.session.rollback(); os.remove(path); flash(f'Erro ao salvar no banco de dados: {e}.', 'error'); return redirect(request.url)
@@ -383,6 +457,7 @@ def add_photo_to_person(person_id):
     if file:
         temp_filename = secure_filename(f"temp_{uuid.uuid4().hex[:8]}.jpg")
         temp_path = os.path.join(app.config['UPLOAD_FOLDER'], temp_filename)
+        file.seek(0)
         file.save(temp_path)
 
         try:
@@ -466,25 +541,36 @@ def edit_person(person_id):
 
     if request.method == 'POST':
         try:
-            person.name = request.form.get('name')
+            name = request.form.get('name')
+            if len(name) > 100:
+                flash('O nome do indivíduo não pode exceder 100 caracteres.', 'error')
+                return redirect(request.url)
+            person.name = name.strip().replace('<', '&lt;').replace('>', '&gt;')
+            
             person.status = request.form.get('status')
             
             doc_number = request.form.get('doc_number')
-            if doc_number == '':
-                doc_number = None
-            person.doc_number = doc_number
-            
+            if doc_number:
+                sanitized_doc_number = doc_number.strip().replace('<', '&lt;').replace('>', '&gt;')
+                if len(sanitized_doc_number) > 50:
+                     flash('O número de documento não pode exceder 50 caracteres.', 'error')
+                     return redirect(request.url)
+                person.doc_number = sanitized_doc_number
+            else:
+                person.doc_number = None
+
             dob_str = request.form.get('date_of_birth')
             person.date_of_birth = date.fromisoformat(dob_str) if dob_str else None
-            person.gender = request.form.get('gender')
-            person.father_name = request.form.get('father_name')
-            person.mother_name = request.form.get('mother_name')
-            person.spouse = request.form.get('spouse')
-            person.children = request.form.get('children')
-            person.phones = request.form.get('phones')
-            person.emails = request.form.get('emails')
-            person.address = request.form.get('address')
-            person.notes = request.form.get('notes')
+            
+            person.gender = request.form.get('gender').strip().replace('<', '&lt;').replace('>', '&gt;') if request.form.get('gender') else None
+            person.father_name = request.form.get('father_name').strip().replace('<', '&lt;').replace('>', '&gt;') if request.form.get('father_name') else None
+            person.mother_name = request.form.get('mother_name').strip().replace('<', '&lt;').replace('>', '&gt;') if request.form.get('mother_name') else None
+            person.spouse = request.form.get('spouse').strip().replace('<', '&lt;').replace('>', '&gt;') if request.form.get('spouse') else None
+            person.children = request.form.get('children').strip().replace('<', '&lt;').replace('>', '&gt;') if request.form.get('children') else None
+            person.phones = request.form.get('phones').strip().replace('<', '&lt;').replace('>', '&gt;') if request.form.get('phones') else None
+            person.emails = request.form.get('emails').strip().replace('<', '&lt;').replace('>', '&gt;') if request.form.get('emails') else None
+            person.address = request.form.get('address').strip().replace('<', '&lt;').replace('>', '&gt;') if request.form.get('address') else None
+            person.notes = request.form.get('notes').strip().replace('<', '&lt;').replace('>', '&gt;') if request.form.get('notes') else None
             
             db.session.commit()
             flash('Dossiê atualizado com sucesso!', 'success')
@@ -542,11 +628,17 @@ def manage_users():
             flash('Todos os campos são obrigatórios.', 'error')
             return redirect(url_for('manage_users'))
 
-        if User.query.filter_by(username=username).first():
+        if len(username) > 80:
+             flash('O nome de usuário não pode exceder 80 caracteres.', 'error')
+             return redirect(url_for('manage_users'))
+        
+        sanitized_username = username.strip().replace('<', '&lt;').replace('>', '&gt;')
+        
+        if User.query.filter_by(username=sanitized_username).first():
             flash('Este nome de usuário já existe.', 'error')
             return redirect(url_for('manage_users'))
-
-        new_user = User(username=username)
+        
+        new_user = User(username=sanitized_username)
         new_user.set_password(password)
 
         if expiration_type == '1_day':
@@ -558,7 +650,7 @@ def manage_users():
         
         db.session.add(new_user)
         db.session.commit()
-        flash(f'Usuário {username} criado com sucesso!', 'success')
+        flash(f'Usuário {sanitized_username} criado com sucesso!', 'success')
         return redirect(url_for('manage_users'))
 
     users = User.query.order_by(User.id).all()
@@ -588,19 +680,25 @@ def reset_user_password(user_id):
             flash('A nova senha não pode estar vazia.', 'error')
             return redirect(url_for('reset_user_password', user_id=user_id))
         
+        if len(new_username) > 80:
+             flash('O nome de usuário não pode exceder 80 caracteres.', 'error')
+             return redirect(url_for('manage_users'))
+
+        sanitized_new_username = new_username.strip().replace('<', '&lt;').replace('>', '&gt;')
+        
         try:
-            if new_username != user_to_reset.username and User.query.filter_by(username=new_username).first():
-                flash(f'O nome de usuário "{new_username}" já está em uso.', 'error')
+            if sanitized_new_username != user_to_reset.username and User.query.filter_by(username=sanitized_new_username).first():
+                flash(f'O nome de usuário "{sanitized_new_username}" já está em uso.', 'error')
                 return redirect(url_for('reset_user_password', user_id=user_id))
 
-            user_to_reset.username = new_username
+            user_to_reset.username = sanitized_new_username
             user_to_reset.set_password(new_password)
             db.session.commit()
             flash(f'Credenciais do usuário "{user_to_reset.username}" atualizadas com sucesso!', 'success')
             return redirect(url_for('manage_users'))
         except IntegrityError:
             db.session.rollback()
-            flash(f'Erro: O nome de usuário "{new_username}" já está em uso.', 'error')
+            flash(f'Erro: O nome de usuário "{sanitized_new_username}" já está em uso.', 'error')
             return redirect(url_for('reset_user_password', user_id=user_id))
         except Exception as e:
             db.session.rollback()
@@ -623,11 +721,17 @@ def my_account():
             flash('Senha atual incorreta.', 'error')
             return redirect(url_for('my_account'))
         
-        if new_username and new_username != user_to_update.username:
-            if User.query.filter_by(username=new_username).first():
-                flash(f'O nome de usuário "{new_username}" já está em uso.', 'error')
+        if len(new_username) > 80:
+             flash('O nome de usuário não pode exceder 80 caracteres.', 'error')
+             return redirect(url_for('my_account'))
+
+        sanitized_new_username = new_username.strip().replace('<', '&lt;').replace('>', '&gt;')
+        
+        if sanitized_new_username and sanitized_new_username != user_to_update.username:
+            if User.query.filter_by(username=sanitized_new_username).first():
+                flash(f'O nome de usuário "{sanitized_new_username}" já está em uso.', 'error')
                 return redirect(url_for('my_account'))
-            user_to_update.username = new_username
+            user_to_update.username = sanitized_new_username
             
         if new_password:
             if len(new_password) < 6:
@@ -686,3 +790,7 @@ def create_admin():
         db.session.add(admin)
         db.session.commit()
         logger.info("Usuário 'admin' criado com sucesso. Senha padrão: admin")
+
+@app.route('/static/uploads/<filename>')
+def static_uploads(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)

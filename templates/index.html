@@ -43,7 +43,7 @@
     <div class="search-toggle">
         <a href="#" id="toggle-link">Ou buscar por texto</a>
     </div>
-
+    
     <div id="result-container" class="result-container">
         <div id="loading-spinner" class="loading-spinner" style="display: none;"></div>
     </div>
@@ -64,14 +64,19 @@ document.getElementById('search-form').addEventListener('submit', function(event
     loadingSpinner.style.display = 'block';
 
     fetch(form.action, { method: 'POST', body: formData })
-    .then(response => response.json())
+    .then(response => {
+        // Verifica se a resposta foi bem-sucedida, se não, lança um erro com a mensagem do servidor
+        if (!response.ok) {
+            return response.json().then(errorData => {
+                throw new Error(errorData.error || 'Erro desconhecido.');
+            });
+        }
+        return response.json();
+    })
     .then(data => {
         loadingSpinner.style.display = 'none';
         let html = '';
-        if (data.error) {
-            html = `<div class="alert alert-error">${data.error}</div>`;
-        } else if (data.status === 'success') {
-            // MUDANÇA AQUI: Removido o h2 "Correspondência Positiva" e o link direto para Analisar Rosto
+        if (data.status === 'success') {
             html = `
                 <div class="result-card">
                     <a href="${data.person.detail_url}"> <img src="${data.person.image_url}" alt="Foto de ${data.person.name}">
@@ -79,14 +84,17 @@ document.getElementById('search-form').addEventListener('submit', function(event
                     <p class="result-name">${data.person.name}</p>
                 </div>
             `;
+            resultContainer.innerHTML = html;
         } else {
+            // Se o status não for "success", exibe a mensagem de status (ex: "Nenhum rosto detectado")
             html = `<div class="alert alert-info">${data.status}</div>`;
+            resultContainer.innerHTML = html;
         }
-        resultContainer.innerHTML = html;
     })
     .catch(error => {
         loadingSpinner.style.display = 'none';
-        resultContainer.innerHTML = `<div class="alert alert-error">Erro de conexão. Tente novamente.</div>`;
+        resultContainer.innerHTML = `<div class="alert alert-error">Erro na busca: ${error.message}.</div>`;
+        console.error('Erro na busca:', error);
     });
 });
 
@@ -109,16 +117,47 @@ toggleLink.addEventListener('click', function(event) {
     }
 });
 
-// Script para atualizar o texto do arquivo selecionado
+// CÓDIGO para o Drag-and-Drop
 document.addEventListener('DOMContentLoaded', function() {
     const fileInput = document.getElementById('image');
-    const fileChosenText = document.getElementById('file-chosen'); 
+    const fileChosenText = document.getElementById('file-chosen');
+    const dropArea = document.querySelector('.custom-file-upload');
 
+    // Atualiza o texto quando um arquivo é selecionado via clique
     fileInput.addEventListener('change', function() {
         if (this.files.length > 0) {
             fileChosenText.textContent = this.files[0].name;
         } else {
             fileChosenText.textContent = 'Nenhum arquivo selecionado';
+        }
+    });
+
+    // Eventos de Drag-and-Drop
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    dropArea.addEventListener('dragenter', () => {
+        dropArea.classList.add('drag-over');
+    });
+
+    dropArea.addEventListener('dragleave', () => {
+        dropArea.classList.remove('drag-over');
+    });
+
+    dropArea.addEventListener('drop', (e) => {
+        dropArea.classList.remove('drag-over');
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        
+        if (files.length > 0) {
+            fileInput.files = files;
+            fileChosenText.textContent = files[0].name;
         }
     });
 });

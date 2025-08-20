@@ -10,6 +10,7 @@
     padding-bottom: 20px;
     border-bottom: 1px solid var(--border-color);
     text-align: left; /* Alinha o texto do título à esquerda por padrão */
+    width: 100%; /* NOVO: Garante que o container ocupe a largura total */
 }
 
 /* Título principal do dashboard */
@@ -28,7 +29,6 @@
 
 /* Estilo para a saudação do usuário */
 .user-greeting {
-    /* Removendo position: absolute; para melhor fluxo responsivo */
     font-size: 1.1em;
     font-weight: 600;
     color: var(--text-secondary);
@@ -37,10 +37,10 @@
     box-shadow: none;
     padding: 0;
     white-space: nowrap;
-    text-align: right; /* Alinha o texto à direita dentro do seu próprio espaço */
-    flex-shrink: 0; /* Evita que o texto encolha */
-    margin-left: auto; /* Empurra para a direita quando há espaço */
-    align-self: flex-start; /* Alinha ao topo dentro do flex container */
+    text-align: right;
+    flex-shrink: 0;
+    margin-left: auto;
+    align-self: flex-start;
 }
 
 /* Grid principal do dashboard */
@@ -161,50 +161,99 @@
     color: var(--text-secondary);
 }
 
+/* NOVO: Estilos para os blocos de status */
+.status-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+}
+
+.status-block {
+    background-color: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 20px 15px;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.status-block:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.status-block .status-count {
+    font-size: 2.5em;
+    font-weight: 700;
+    margin: 0 0 5px 0;
+}
+
+.status-block .status-label {
+    font-size: 0.8em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+}
+
+.status-em-observacao .status-count { color: #d4a731; }
+.status-ativo .status-count { color: var(--accent-green); }
+.status-procurado .status-count { color: var(--accent-red); }
+.status-inativo .status-count { color: #8b949e; }
+.status-nao-especificado .status-count { color: var(--accent-blue); }
+
+/* Classes utilitárias para esconder elementos em diferentes tamanhos de tela */
+.hide-on-mobile { display: block; }
+.hide-on-desktop { display: none; }
+
+
 /* --- Media Queries para Responsividade --- */
 
 /* Telas médias (tablets em paisagem, laptops menores) */
 @media (max-width: 1200px) {
     .dashboard-grid {
-        grid-template-columns: 1fr 1fr; /* Duas colunas */
+        grid-template-columns: 1fr 1fr;
     }
     .activity-card {
-        grid-column: 1 / -1; /* Ocupa a largura total abaixo dos outros dois */
+        grid-column: 1 / -1;
     }
 }
 
 /* Telas pequenas (tablets em retrato, celulares) */
 @media (max-width: 768px) {
     .dashboard-header-container {
-        flex-direction: column; /* Empilha título, subtítulo e saudação */
-        align-items: center; /* Centraliza todos os itens */
-        text-align: center; /* Centraliza o texto */
+        flex-direction: column;
+        align-items: flex-start; /* CORREÇÃO: Alinha à esquerda para melhor legibilidade */
+        text-align: left; /* CORREÇÃO: Alinha o texto à esquerda */
     }
 
     .dashboard-header-container h1,
     .dashboard-header-container .subtitle {
-        text-align: center; /* Garante centralização em telas pequenas */
+        text-align: left; /* Garante alinhamento à esquerda em telas pequenas */
     }
 
     .user-greeting {
-        position: static; /* Remove o posicionamento absoluto */
-        margin-top: 15px; /* Adiciona espaço acima quando empilhado */
-        text-align: center; /* Centraliza o texto da saudação */
-        width: 100%; /* Ocupa a largura total */
-        font-size: 1em; /* Ajusta o tamanho da fonte */
+        position: static;
+        margin-top: 15px;
+        text-align: left; /* CORREÇÃO: Alinha o texto à esquerda */
+        width: 100%;
+        font-size: 1em;
+        order: -1; /* Força a saudação a aparecer primeiro */
     }
 
     .dashboard-grid {
-        grid-template-columns: 1fr; /* Tudo vira uma coluna só */
+        grid-template-columns: 1fr;
     }
 
     .dashboard-card {
-        padding: 20px; /* Reduz o padding dos cartões */
+        padding: 20px;
     }
 
     .stat-card .stat-number {
-        font-size: 3.5em; /* Reduz o tamanho do número estatístico */
+        font-size: 3.5em;
     }
+    
+    /* Regras de "esconder e mostrar" para mobile */
+    .hide-on-mobile { display: none; }
+    .hide-on-desktop { display: block; }
 }
 
 /* Telas muito pequenas (celulares menores) */
@@ -214,15 +263,15 @@
         padding-bottom: 15px;
     }
     h1 {
-        font-size: 2em; /* Reduz o tamanho do título principal */
+        font-size: 2em;
     }
     p.subtitle {
-        font-size: 1em; /* Reduz o tamanho do subtítulo */
+        font-size: 1em;
     }
     .dashboard-card {
-        padding: 15px; /* Reduz ainda mais o padding dos cartões */
+        padding: 15px;
     }
     .stat-card .stat-number {
-        font-size: 3em; /* Reduz o tamanho do número estatístico */
+        font-size: 3em;
     }
 }
